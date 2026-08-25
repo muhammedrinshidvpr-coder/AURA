@@ -1,0 +1,7 @@
+# Copy this file to db.properties (same folder) and fill in your local test-DB credentials.
+# db.properties is git-ignored — never commit real credentials.
+# Points at a disposable test schema, never the real aura_db — see docs/TESTING.md section 4.
+
+db.url=jdbc:mysql://localhost:3306/aura_test_db
+db.user=root
+db.password=changeme

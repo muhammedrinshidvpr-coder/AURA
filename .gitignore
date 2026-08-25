@@ -1,0 +1,27 @@
+# Build output
+target/
+*.class
+*.jar
+
+# Local DB credentials — never commit real secrets.
+# A db.properties.example template is committed instead.
+src/main/resources/db.properties
+src/test/resources/db.properties
+
+# Portable local build tools (downloaded, not part of the project)
+.tools/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
