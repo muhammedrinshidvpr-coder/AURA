@@ -102,8 +102,12 @@ classDiagram
         -String title
         -String description
         -SubmissionType type
+        -Category category
+        -String location
         -Priority priority
         -SubmissionStatus status
+        -String photoUrl
+        -int hypeCount
         -LocalDateTime createdAt
         +createSubmission() void
         +updateStatus(SubmissionStatus status) void
@@ -145,12 +149,21 @@ classDiagram
         -LocalDateTime createdAt
     }
 
+    class StudentReceipt {
+        -int receiptId
+        -int studentId
+        -int submissionId
+        -LocalDateTime createdAt
+    }
+
     User <|-- Student
     User <|-- Admin
     Submission <|-- Issue
     Submission <|-- Suggestion
 
     User "1" --> "0..*" Submission : creates
+    Student "1" --> "0..*" StudentReceipt : holds
+    StudentReceipt "1" --> "1" Submission : references
     Admin "1" --> "0..*" ResolutionNote : created by
     Submission "1" --> "0..*" SubmissionHistory : manages / reviews
     Submission "1" --> "0..*" ResolutionNote : has
@@ -167,6 +180,16 @@ classDiagram
         <<enumeration>>
         ISSUE
         SUGGESTION
+    }
+
+    class Category {
+        <<enumeration>>
+        IT_INFRASTRUCTURE
+        ELECTRICAL
+        CIVIL_MAINTENANCE
+        ACADEMIC_LABS
+        HOSTEL_MESS
+        GENERAL
     }
 
     class Priority {
@@ -240,11 +263,31 @@ classDiagram
         +findSubmissionIdsByStudent(int studentId) List~Integer~
     }
 
+    class SubmissionHypeDAO {
+        +addHype(int submissionId, int studentId) void
+        +removeHype(int submissionId, int studentId) void
+        +countHypes(int submissionId) int
+        +hasStudentHyped(int submissionId, int studentId) boolean
+    }
+
+    class ResolutionNoteDAO {
+        +save(ResolutionNote note) void
+        +findBySubmission(int submissionId) List~ResolutionNote~
+    }
+
+    class SubmissionHistoryDAO {
+        +save(SubmissionHistory history) void
+        +findBySubmission(int submissionId) List~SubmissionHistory~
+    }
+
     AuthService ..> UserDAO : uses
     SubmissionService ..> SubmissionDAO : uses
     TrackingService ..> SubmissionDAO : uses
+    TrackingService ..> StudentReceiptDAO : uses
+    TrackingService ..> SubmissionHistoryDAO : uses
+    TrackingService ..> ResolutionNoteDAO : uses
     ReportService ..> SubmissionDAO : uses
-    HypeService ..> SubmissionDAO : uses
+    HypeService ..> SubmissionHypeDAO : uses
 ```
 
 ---
@@ -328,10 +371,12 @@ src/main/java/aura/
 │   ├── Suggestion.java
 │   ├── SubmissionHistory.java
 │   ├── ResolutionNote.java
-│   └── SubmissionHype.java
+│   ├── SubmissionHype.java
+│   └── StudentReceipt.java
 ├── enums/                           # Domain Enumerations (Slide 14)
 │   ├── Role.java
 │   ├── SubmissionType.java
+│   ├── Category.java
 │   ├── Priority.java
 │   └── SubmissionStatus.java
 ├── dao/                             # JDBC Data Access Objects with PreparedStatements
