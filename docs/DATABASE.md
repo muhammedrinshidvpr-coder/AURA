@@ -1,134 +1,180 @@
-# Database Design — AURA
+# Database Design Specification — AURA
 
-Companion to [`ARCHITECTURE.md`](ARCHITECTURE.md) §5 (anonymity boundary) and [`SECURITY.md`](SECURITY.md). DDL matching this document lives in [`../sql/schema.sql`](../sql/schema.sql) — the two must never drift; if you change one, change the other in the same commit.
+**Autonomous University Response and Action**  
+Department of Computer Science & Engineering, TKM College of Engineering (TKMCE)  
+Database Engine: Supabase Cloud PostgreSQL 15+  
+Presentation Reference: [`docs/AURA.pdf`](AURA.pdf) (Slide 13, 15, 24)
 
-## 1. Entity-relationship diagram
+---
+
+## 1. Entity-Relationship (ER) Model
+
+The ER design builds directly on Slide 13 and Slide 24 of [`docs/AURA.pdf`](AURA.pdf), introducing the `student_submission_receipts` vault table and `submission_hype` table to resolve student privacy and crowd upvoting:
 
 ```mermaid
 erDiagram
-    USERS ||--o{ SUBMISSIONS : "creates (student_id)"
-    USERS ||--o{ RESOLUTION_NOTES : "writes (admin_id)"
-    USERS ||--o{ SUBMISSION_HYPE : "casts (student_id)"
-    SUBMISSIONS ||--o{ SUBMISSION_HISTORY : "has"
-    SUBMISSIONS ||--o{ RESOLUTION_NOTES : "has"
+    USERS ||--o{ STUDENT_SUBMISSION_RECEIPTS : "holds (private)"
+    USERS ||--o{ SUBMISSION_HYPE : "casts (voter)"
+    USERS ||--o{ RESOLUTION_NOTES : "authors (admin)"
+    USERS ||--o{ SUBMISSION_HISTORY : "initiates (admin)"
+    SUBMISSIONS ||--o{ STUDENT_SUBMISSION_RECEIPTS : "referenced by"
     SUBMISSIONS ||--o{ SUBMISSION_HYPE : "receives"
+    SUBMISSIONS ||--o{ RESOLUTION_NOTES : "has"
+    SUBMISSIONS ||--o{ SUBMISSION_HISTORY : "tracks"
 
     USERS {
         int user_id PK
-        varchar name
-        varchar email
-        varchar password_hash
-        enum role
-    }
-    SUBMISSIONS {
-        int submission_id PK
-        int student_id FK "service-layer secret, see 3"
-        varchar title
-        text description
-        enum type
-        enum priority
-        enum status
+        varchar name "100"
+        varchar email "150 UNIQUE (@tkmce.ac.in)"
+        varchar password_hash "255 (BCrypt)"
+        varchar role "STUDENT or ADMIN"
         timestamp created_at
     }
-    SUBMISSION_HISTORY {
-        int history_id PK
-        int submission_id FK
-        varchar old_status
-        varchar new_status
-        int changed_by FK
-        timestamp changed_at
+
+    SUBMISSIONS {
+        int submission_id PK
+        varchar title "200"
+        text description
+        varchar type "ISSUE, SUGGESTION"
+        varchar category "IT, ELECTRICAL, CIVIL, etc."
+        varchar location "150 (Campus Block/Room)"
+        varchar priority "LOW, MEDIUM, HIGH"
+        varchar status "PENDING, ASSIGNED, IN_PROGRESS, RESOLVED, REJECTED"
+        text photo_url "Supabase Storage URL"
+        timestamp created_at
     }
+
+    STUDENT_SUBMISSION_RECEIPTS {
+        int receipt_id PK
+        int student_id FK "Users(user_id)"
+        int submission_id FK "Submissions(submission_id)"
+        timestamp created_at
+    }
+
+    SUBMISSION_HYPE {
+        int hype_id PK
+        int submission_id FK "Submissions(submission_id)"
+        int student_id FK "Users(user_id)"
+        timestamp created_at
+    }
+
     RESOLUTION_NOTES {
         int note_id PK
-        int submission_id FK
-        int admin_id FK
+        int submission_id FK "Submissions(submission_id)"
+        int admin_id FK "Users(user_id)"
         text note
         timestamp created_at
     }
-    SUBMISSION_HYPE {
-        int hype_id PK
-        int submission_id FK
-        int student_id FK "the voter, not the poster"
-        timestamp created_at
+
+    SUBMISSION_HISTORY {
+        int history_id PK
+        int submission_id FK "Submissions(submission_id)"
+        varchar old_status "50"
+        varchar new_status "50"
+        int changed_by FK "Users(user_id)"
+        timestamp changed_at
     }
 ```
 
-This is the original PPT's ER design (`users`, `submissions`, `submission_history`, `resolution_notes`) plus one new table, `submission_hype`, and one access-control note on `submissions.student_id` explained in §3.
+---
 
-## 2. Tables
+## 2. Table Schemas & Data Dictionary
 
-### `users`
-Unchanged from the original design.
+### 2.1 `users`
+Stores student and administrator credentials. Only institutional TKMCE email addresses are permitted.
 
-| Column | Type | Notes |
-|---|---|---|
-| `user_id` | `INT PK AUTO_INCREMENT` | |
-| `name` | `VARCHAR(100)` | |
-| `email` | `VARCHAR(150) UNIQUE` | must match the TKMCE domain — enforced in `AuthService`/`ValidationUtil`, not by a DB constraint (regex isn't portable SQL; see [`SECURITY.md`](SECURITY.md)) |
-| `password_hash` | `VARCHAR(255)` | BCrypt output, 60 chars — sized generously |
-| `role` | `ENUM('STUDENT','ADMIN')` | |
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| `user_id` | `SERIAL` | `PRIMARY KEY` | Unique identifier for each user. |
+| `name` | `VARCHAR(100)` | `NOT NULL` | Full legal name of student or administrator. |
+| `email` | `VARCHAR(150)` | `NOT NULL UNIQUE` | Official TKMCE domain email (`@tkmce.ac.in`). |
+| `password_hash` | `VARCHAR(255)` | `NOT NULL` | Salted 60-character BCrypt hash string. |
+| `role` | `VARCHAR(20)` | `CHECK IN ('STUDENT','ADMIN')` | Authorization role for RBAC enforcement. |
+| `created_at` | `TIMESTAMPTZ` | `DEFAULT CURRENT_TIMESTAMP` | Account registration timestamp. |
 
-### `submissions`
-Unchanged columns from the original design — the anonymity design is an **access** change, not a **schema** change (see §3).
+---
 
-| Column | Type | Notes |
-|---|---|---|
-| `submission_id` | `INT PK AUTO_INCREMENT` | |
-| `student_id` | `INT FK → users.user_id` | see §3 — never selected on admin-facing paths |
-| `title` | `VARCHAR(200)` | |
-| `description` | `TEXT` | |
-| `type` | `ENUM('ISSUE','SUGGESTION')` | |
-| `priority` | `ENUM('LOW','MEDIUM','HIGH')` | |
-| `status` | `ENUM('PENDING','ASSIGNED','IN_PROGRESS','RESOLVED','REJECTED')` | default `PENDING` |
-| `created_at` | `TIMESTAMP` | default `CURRENT_TIMESTAMP` |
+### 2.2 `submissions` (Anonymous Public Issues)
+**The Core Anonymity Guarantee:** Notice that this table contains **no `student_id` column**. Administrative queries across this table physically cannot access the identity of the student who created the issue.
 
-### `submission_history`
-Unchanged — audit trail of status transitions.
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| `submission_id` | `SERIAL` | `PRIMARY KEY` | Unique ticket number (e.g., `#SUB-104`). |
+| `title` | `VARCHAR(200)` | `NOT NULL` | Concise summary of the issue or suggestion. |
+| `description` | `TEXT` | `NOT NULL` | Detailed description of the problem or proposal. |
+| `type` | `VARCHAR(20)` | `CHECK IN ('ISSUE','SUGGESTION')` | Differentiates problem reports from new ideas. |
+| `category` | `VARCHAR(50)` | `NOT NULL` | Department routing (IT, Electrical, Civil, Labs, Hostel, General). |
+| `location` | `VARCHAR(150)` | `NOT NULL` | Physical campus location (e.g., "CSE Lab 3"). |
+| `priority` | `VARCHAR(20)` | `CHECK IN ('LOW','MEDIUM','HIGH')` | Student-assessed urgency level. |
+| `status` | `VARCHAR(20)` | `DEFAULT 'PENDING'` | Current status in the 5-state lifecycle pipeline. |
+| `photo_url` | `TEXT` | `NULL` | Optional URL of photo evidence in Supabase Storage. |
+| `created_at` | `TIMESTAMPTZ` | `DEFAULT CURRENT_TIMESTAMP` | Ticket creation timestamp. |
 
-| Column | Type | Notes |
-|---|---|---|
-| `history_id` | `INT PK AUTO_INCREMENT` | |
-| `submission_id` | `INT FK → submissions.submission_id` | |
-| `old_status` | `VARCHAR(50)` | |
-| `new_status` | `VARCHAR(50)` | |
-| `changed_by` | `INT FK → users.user_id` | the admin who made the change (admins are not anonymous) |
-| `changed_at` | `TIMESTAMP` | default `CURRENT_TIMESTAMP` |
+---
 
-### `resolution_notes`
-Unchanged.
+### 2.3 `student_submission_receipts` (The Anonymity Vault)
+Private receipt mapping that enables a student to track "My Submissions" without leaking their identity to administrative queues.
 
-| Column | Type | Notes |
-|---|---|---|
-| `note_id` | `INT PK AUTO_INCREMENT` | |
-| `submission_id` | `INT FK → submissions.submission_id` | |
-| `admin_id` | `INT FK → users.user_id` | |
-| `note` | `TEXT` | |
-| `created_at` | `TIMESTAMP` | default `CURRENT_TIMESTAMP` |
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| `receipt_id` | `SERIAL` | `PRIMARY KEY` | Unique receipt identifier. |
+| `student_id` | `INT` | `REFERENCES users(user_id)` | Identity of the submitting student. |
+| `submission_id` | `INT` | `REFERENCES submissions(id)` | Target submission created by the student. |
+| `created_at` | `TIMESTAMPTZ` | `DEFAULT CURRENT_TIMESTAMP` | Submission timestamp. |
 
-### `submission_hype` — new table
-| Column | Type | Notes |
-|---|---|---|
-| `hype_id` | `INT PK AUTO_INCREMENT` | |
-| `submission_id` | `INT FK → submissions.submission_id` | |
-| `student_id` | `INT FK → users.user_id` | the **voter** — this is a different identity relationship than `submissions.student_id`, and is not subject to the anonymity rule, because knowing who hyped something never reveals who posted it |
-| `created_at` | `TIMESTAMP` | default `CURRENT_TIMESTAMP` |
+*Unique Constraint:* `UNIQUE (student_id, submission_id)` ensures a one-to-one receipt mapping per student ticket.
 
-`UNIQUE (submission_id, student_id)` — the database itself refuses a second hype from the same student on the same submission; this is not left to application logic alone (defense in depth, matches [`AGENT.md`](../AGENT.md) rule 6's "don't trust only the UI/service layer" principle applied to data integrity too).
+---
 
-**Hype count is computed, not cached**: `SELECT COUNT(*) FROM submission_hype WHERE submission_id = ?`, backed by an index on `submission_hype(submission_id)`. A cached counter column on `submissions` (incremented/decremented on every hype/un-hype) was considered and rejected: at campus scale the count query is trivial, while a cached counter introduces a whole class of consistency bugs (missed decrements, race conditions between concurrent hypes) that are hard to explain and harder to test convincingly for a course project.
+### 2.4 `submission_hype` (Trending Upvotes)
+Records crowd support from students.
 
-## 3. The anonymity design, explained
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| `hype_id` | `SERIAL` | `PRIMARY KEY` | Unique vote identifier. |
+| `submission_id` | `INT` | `REFERENCES submissions(id)` | Target ticket being upvoted. |
+| `student_id` | `INT` | `REFERENCES users(user_id)` | Student who cast the vote. |
+| `created_at` | `TIMESTAMPTZ` | `DEFAULT CURRENT_TIMESTAMP` | Upvote timestamp. |
 
-The product requirement is: **nobody, including admin, can trace a submission back to the student who posted it.** But a student must still be able to see their own submission history (`FR-5` in [`TRD.md`](TRD.md)). Two identity relationships exist that must not be confused:
+*Unique Constraint:* `UNIQUE (submission_id, student_id)` prevents repeat upvoting.
 
-- `submissions.student_id` — **who posted**. This must stay invisible to every admin-facing path.
-- `submission_hype.student_id` — **who voted**. This can safely be known internally (it's needed to enforce one-hype-per-student); it never reveals who posted the submission being voted on.
+---
 
-**The chosen design (v1): the FK stays in the schema; anonymity is enforced by never querying it from admin-reachable code.**
+### 2.5 `resolution_notes` & `submission_history`
+Stores official resolution summaries and tracks status transitions for auditability.
 
-- `submissions.student_id` is a real, indexed FK — this is what lets `TrackingService.findMySubmissions()` do a simple, fast `WHERE student_id = ?` for the logged-in student's own dashboard.
-- Every DAO method used by an admin-facing service (`AdminSubmissionService` and friends) is written to never `SELECT` that column — not filtered out afterward, simply never fetched. See [`ARCHITECTURE.md`](ARCHITECTURE.md) §5 for the exact rule and where it's enforced in code.
+---
 
-**Honest limitation, stated plainly:** this is an **application-layer** guarantee, not a cryptographic one. Anyone with direct SQL access to the production database (not through the app) could still run `SELECT student_id FROM submissions` and correlate it against `users`. For a campus course project with one shared MySQL instance and a small trusted team, this is a reasonable, explainable trade-off — and it's far better than silently promising something the design can't actually deliver.
+## 3. Query Optimization & Indexing Strategy
 
-**Documented stretch goal (not built for v1):** a token-based scheme where the server never stores a submission↔student link at all — instead, at submission time the server generates a random tracking code, returns it once to the submitting student's client, and the student re-supplies that code to check status later. This would remove the FK entirely and make the anonymity guarantee unlinkable even against direct DB access. It's a legitimate "if we had more time" answer for a viva/demo, not something to half-implement now.
+To guarantee rapid UI responsiveness, B-tree indexes are declared in `sql/schema.sql`:
+
+1. **Trending Aggregation Index:**
+   ```sql
+   CREATE INDEX idx_hype_submission ON submission_hype (submission_id);
+   ```
+   Accelerates `SELECT COUNT(*) FROM submission_hype WHERE submission_id = ?` for calculating trending scores.
+2. **Status & Category Filter Indexes:**
+   ```sql
+   CREATE INDEX idx_submissions_status ON submissions (status);
+   CREATE INDEX idx_submissions_category ON submissions (category);
+   ```
+   Speeds up administrative queue filtering by status and department.
+3. **Vault Lookup Index:**
+   ```sql
+   CREATE INDEX idx_receipts_student ON student_submission_receipts (student_id);
+   ```
+   Ensures instantaneous retrieval of personal tickets when a student opens the "My Submissions" dashboard.
+
+---
+
+## 4. Supabase Cloud Connection Configuration
+
+Java connects to Supabase PostgreSQL using TLS-secured JDBC. In `src/main/resources/db.properties`:
+
+```properties
+db.url=jdbc:postgresql://db.YOUR_SUPABASE_PROJECT_REF.supabase.co:5432/postgres?sslmode=require
+db.user=postgres
+db.password=YOUR_SUPABASE_DB_PASSWORD
+db.driver=org.postgresql.Driver
+```

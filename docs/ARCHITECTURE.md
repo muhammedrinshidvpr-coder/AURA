@@ -1,133 +1,376 @@
-# Architecture — AURA
+# Architecture Specification — AURA
 
-Companion to [`TRD.md`](TRD.md) (requirements) and [`DATABASE.md`](DATABASE.md) (schema). This is the map every class must appear on before it's written — see [`AGENT.md`](../AGENT.md) rule 0.
+**Autonomous University Response and Action**  
+Department of Computer Science & Engineering, TKM College of Engineering (TKMCE)  
+Academic Reference: APJ Abdul Kalam Technological University (KTU) CST205 / CSL203
 
-## 1. Layered design
+---
 
-```
-┌──────────────────────────────────────────────┐
-│  aura.ui            Swing screens & listeners │
-└───────────────────────┬────────────────────────┘
-                         │ calls
-┌───────────────────────▼────────────────────────┐
-│  aura.service       Validation, business rules │
-│                     session/role checks         │
-└───────────────────────┬────────────────────────┘
-                         │ calls
-┌───────────────────────▼────────────────────────┐
-│  aura.dao           SQL, PreparedStatement,     │
-│                     ResultSet → object mapping   │
-└───────────────────────┬────────────────────────┘
-                         │ JDBC
-┌───────────────────────▼────────────────────────┐
-│  MySQL              users, submissions,         │
-│                     submission_hype,             │
-│                     submission_history,          │
-│                     resolution_notes             │
-└──────────────────────────────────────────────┘
-```
+## 1. Executive Summary & Approved Design Alignment
 
-**Hard rule:** calls only ever go downward (UI → Service → DAO → DB). A layer never reaches back up, and no layer skips the one directly beneath it. `aura.dao` is the only package permitted to import `java.sql.*`.
+This document formalizes the technical architecture of AURA, directly reflecting and expanding upon the approved Phase 1 architecture presentation ([`docs/AURA.pdf`](AURA.pdf), Slides 11–15). 
 
-## 2. Package map
+AURA is built strictly with **Java 17 (SE)**, modern **FlatLaf** desktop GUI, **JDBC DAO patterns**, and cloud-hosted **Supabase PostgreSQL** relational persistence. It adheres to all object-oriented programming (OOP) principles mandated by the KTU syllabus while resolving real-world security challenges through an innovative **Decoupled Anonymity Vault**.
 
-```
-aura
-├── Main.java                 entry point: sets Nimbus L&F, opens LoginFrame
-├── config
-│   └── DatabaseConfig.java   reads db.properties, hands out Connections
-├── model                     plain data classes (no logic beyond simple getters/behavior)
-├── enums
-├── dao                       JDBC only, one class per table/aggregate
-├── service                   business rules, session/role checks, orchestrates DAOs
-├── ui                        Swing frames/panels, split into ui.student / ui.admin
-├── util                      small stateless helpers
-└── exception                 checked/unchecked exception hierarchy
-```
+---
 
-## 3. Class list per package
+## 2. 4-Layer System Architecture (Slide 12 & 15)
 
-### `aura.model`
-| Class | Responsibility |
-|---|---|
-| `User` | Shared identity fields (id, name, email, password hash, role). Base for `Student`/`Admin`. |
-| `Student` | `User` specialization — no extra fields; exists for role-based method dispatch and clarity. |
-| `Admin` | `User` specialization — same reasoning. |
-| `Submission` | One reported issue/suggestion: type, priority, title, description, status, timestamps. **Never carries `studentId` outside of the narrow ownership path — see §5.** |
-| `SubmissionHistory` | One status transition record (old status → new status, who changed it, when). |
-| `ResolutionNote` | One admin note attached to a submission at resolution time. |
-| `SubmissionHype` | One hype record: which submission, which voting student, when. |
+As approved in Slide 12 and Slide 15 of [`docs/AURA.pdf`](AURA.pdf), the system enforces strict downward dependency flow with complete separation of concerns:
 
-### `aura.enums`
-| Enum | Values |
-|---|---|
-| `Role` | `STUDENT`, `ADMIN` |
-| `SubmissionType` | `ISSUE`, `SUGGESTION` |
-| `Priority` | `LOW`, `MEDIUM`, `HIGH` |
-| `SubmissionStatus` | `PENDING`, `ASSIGNED`, `IN_PROGRESS`, `RESOLVED`, `REJECTED` |
+```mermaid
+graph TD
+    subgraph Layer1 [Layer 1: Presentation Layer - FlatLaf Modern Java GUI]
+        LS[LoginScreen]
+        SD[StudentDashboardFrame]
+        AD[AdminDashboardFrame]
+        SF[SubmissionFormPanel]
+        TI[TrackingInterfacePanel]
+        RP[ReportsInterfacePanel]
+    end
 
-### `aura.dao`
-| Class | Responsibility |
-|---|---|
-| `UserDAO` | CRUD on `users`; lookup by email for login. |
-| `SubmissionDAO` | CRUD on `submissions`. Public query methods intentionally split by audience — see the anonymity boundary in §5. |
-| `SubmissionHistoryDAO` | Insert/read status-change audit rows. |
-| `ResolutionNoteDAO` | Insert/read resolution notes for a submission. |
-| `SubmissionHypeDAO` | Insert a hype (respecting the DB `UNIQUE` constraint), delete a hype, count hypes per submission. |
+    subgraph Layer2 [Layer 2: Service Layer - Business Logic & State Machine]
+        AS[AuthService]
+        SS[SubmissionService]
+        TS[TrackingService]
+        RS[ReportService]
+        HS[HypeService]
+    end
 
-### `aura.service`
-| Class | Responsibility |
-|---|---|
-| `AuthService` | Register/login: TKMCE-domain validation, password hashing/verification, session creation. |
-| `SubmissionService` | Create a submission, fetch trending/recent lists (no author identity), fetch a single submission's public detail. |
-| `TrackingService` | `findMySubmissions()` for the logged-in student only; status lookups for a student's own history. |
-| `HypeService` | Add/remove a hype for the current student on a submission; enforce one-per-student at the service layer as a second line of defense behind the DB constraint. |
-| `AdminSubmissionService` | Admin-only: queue view (no author identity), assign, update status, attach resolution note. Re-validates admin role on every call (see [`AGENT.md`](../AGENT.md) rule 6). |
-| `ReportService` | Builds the CSV export for admin. |
+    subgraph Layer3 [Layer 3: Data Access Layer - JDBC DAO]
+        UD[UserDAO]
+        SubD[SubmissionDAO]
+        RND[ResolutionNoteDAO]
+        SHD[SubmissionHistoryDAO]
+        HypeD[SubmissionHypeDAO]
+        VaultD[StudentReceiptDAO]
+    end
 
-### `aura.ui`
-Split into `aura.ui.student` and `aura.ui.admin` so the anonymity/authorization boundary in §5 is visible in the folder structure itself, not just in a rule someone has to remember.
+    subgraph Layer4 [Layer 4: Relational Database Layer - Supabase PostgreSQL]
+        DB[(Users, Submissions, StudentReceipts, Hype, History, Notes)]
+    end
 
-| Class | Responsibility |
-|---|---|
-| `LoginFrame` | TKMCE-domain-gated login/registration screen. |
-| `ui.student.StudentDashboardFrame` | Trending/Recent list + My Submissions tab. |
-| `ui.student.SubmissionFormPanel` | Create-submission form. |
-| `ui.admin.AdminDashboardFrame` | Queue, assignment, resolution note entry, dashboard stats. |
-| `ui.admin.ReportPanel` | Triggers CSV export via `ReportService`. |
-
-### `aura.util`
-| Class | Responsibility |
-|---|---|
-| `PasswordUtil` | Wraps jBCrypt hash/verify calls — the only place BCrypt is called directly. |
-| `ValidationUtil` | TKMCE email-domain check, submission title/description length checks — the single source of truth referenced by both UI and service (per [`TRD.md`](TRD.md) §6). |
-| `SessionContext` | Holds the currently logged-in user for the running client (in-memory, single-user desktop session — no token/JWT machinery needed). |
-
-### `aura.exception`
-| Class | Responsibility |
-|---|---|
-| `AuraException` | Base unchecked exception for all application-level errors. |
-| `InvalidCredentialsException` | Login failed / bad TKMCE domain. |
-| `UnauthorizedActionException` | A service method's role check failed. |
-| `DuplicateHypeException` | A student tried to hype the same submission twice. |
-
-## 4. Request/response flow
-
-```
-User → ui (Swing) → service (validation + rules) → dao (JDBC) → MySQL
-User ← ui (Swing) ← service (mapped result / exception) ← dao (ResultSet) ← MySQL
+    Layer1 -->|Method Calls / DTOs| Layer2
+    Layer2 -->|Interface Invocations| Layer3
+    Layer3 -->|PreparedStatement / JDBC Connection Pool| Layer4
 ```
 
-Exceptions from `aura.dao` (e.g. `SQLException`) are caught at the `aura.service` boundary and re-thrown as an `aura.exception` type — `java.sql.SQLException` should never propagate up to `aura.ui`. This is also what the "Exception handling" row in `TRD.md`'s course-concept table refers to.
+### Architectural Layering Rules (Non-Negotiable):
+1. **Downwards Only:** `Layer 1 (GUI)` calls `Layer 2 (Service)`. `Layer 2` calls `Layer 3 (DAO)`. `Layer 3` calls `Layer 4 (Database)`.
+2. **Strict Encapsulation:** GUI classes never import `java.sql.*` or execute SQL. Only `aura.dao` classes may touch JDBC.
+3. **Exception Translation:** Low-level `SQLException` instances are caught within the DAO/Service boundary and wrapped in domain exceptions (`AuraException`, `InvalidCredentialsException`, `UnauthorizedActionException`).
 
-## 5. Anonymity boundary (architectural law)
+---
 
-This is the single most important rule in this document, restated from [`AGENT.md`](../AGENT.md):
+## 3. Approved UML Class Diagram (Slide 14)
 
-> Any DAO or service method reachable from `aura.ui.admin.*` must never `SELECT` or join `submissions.student_id`. Only `SubmissionDAO.findMySubmissions(int studentId)`, called exclusively from `TrackingService` on behalf of the currently logged-in student, may touch that column.
+The diagram below mirrors the exact UML Class Diagram approved by faculty in Slide 14 of [`docs/AURA.pdf`](AURA.pdf), with the natural addition of the `SubmissionHype` entity and `HypeService` for the trending mechanism:
 
-Concretely:
-- `AdminSubmissionService` and everything under `aura.ui.admin` are built against a `SubmissionDAO` query set that simply never returns `student_id` — not "returns it but the UI hides it." The column isn't in the result at all on that path.
-- `TrackingService.findMySubmissions()` takes no external `studentId` parameter from the UI layer — it reads the id from `SessionContext` itself, so there's no way to call it with someone else's id even by mistake.
+```mermaid
+classDiagram
+    %% PACKAGE MODEL
+    class User {
+        -int userId
+        -String name
+        -String email
+        -String password
+        -Role role
+        +login() boolean
+        +logout() void
+        +getRole() Role
+    }
 
-See [`DATABASE.md`](DATABASE.md) for the schema-level reasoning and [`SECURITY.md`](SECURITY.md) for the honest limits of this guarantee.
+    class Student {
+        +submitIssue() Issue
+        +submitSuggestion() Suggestion
+        +viewSubmissions() List~Submission~
+        +trackSubmission(int submissionId) Submission
+    }
+
+    class Admin {
+        +viewSubmissions() List~Submission~
+        +reviewSubmission(int submissionId) void
+        +assignSubmission(int submissionId) void
+        +updateStatus(int submissionId, SubmissionStatus status) void
+        +addResolutionNote(int submissionId, String note) void
+        +viewDashboard() void
+        +generateReport() void
+    }
+
+    class Submission {
+        -int submissionId
+        -String title
+        -String description
+        -SubmissionType type
+        -Priority priority
+        -SubmissionStatus status
+        -LocalDateTime createdAt
+        +createSubmission() void
+        +updateStatus(SubmissionStatus status) void
+        +getStatus() SubmissionStatus
+        +getDetails() String
+    }
+
+    class Issue {
+        +createIssue() Issue
+    }
+
+    class Suggestion {
+        +createSuggestion() Suggestion
+    }
+
+    class SubmissionHistory {
+        -int historyId
+        -int submissionId
+        -SubmissionStatus oldStatus
+        -SubmissionStatus newStatus
+        -int changedBy
+        -LocalDateTime changedAt
+        +recordChange() void
+    }
+
+    class ResolutionNote {
+        -int noteId
+        -int submissionId
+        -int adminId
+        -String note
+        -LocalDateTime createdAt
+        +addNote() void
+    }
+
+    class SubmissionHype {
+        -int hypeId
+        -int submissionId
+        -int studentId
+        -LocalDateTime createdAt
+    }
+
+    User <|-- Student
+    User <|-- Admin
+    Submission <|-- Issue
+    Submission <|-- Suggestion
+
+    User "1" --> "0..*" Submission : creates
+    Admin "1" --> "0..*" ResolutionNote : created by
+    Submission "1" --> "0..*" SubmissionHistory : manages / reviews
+    Submission "1" --> "0..*" ResolutionNote : has
+    Submission "1" --> "0..*" SubmissionHype : receives
+
+    %% PACKAGE ENUM
+    class Role {
+        <<enumeration>>
+        STUDENT
+        ADMIN
+    }
+
+    class SubmissionType {
+        <<enumeration>>
+        ISSUE
+        SUGGESTION
+    }
+
+    class Priority {
+        <<enumeration>>
+        LOW
+        MEDIUM
+        HIGH
+    }
+
+    class SubmissionStatus {
+        <<enumeration>>
+        PENDING
+        ASSIGNED
+        IN_PROGRESS
+        RESOLVED
+        REJECTED
+    }
+
+    %% PACKAGE SERVICE
+    class AuthService {
+        +authenticate(String email, String password) User
+        +logout(int userId) void
+        +validateCredentials(String email, String password) boolean
+    }
+
+    class SubmissionService {
+        +createSubmission(Submission submission) Submission
+        +getSubmission(int submissionId) Submission
+        +getStudentSubmissions(int studentId) List~Submission~
+        +updateSubmission(Submission submission) void
+    }
+
+    class TrackingService {
+        +getStatus(int submissionId) SubmissionStatus
+        +updateStatus(int submissionId, SubmissionStatus status) void
+        +getSubmissionHistory(int submissionId) List~SubmissionHistory~
+    }
+
+    class ReportService {
+        +generateReport(Map~String, Object~ filters) byte[]
+        +getDashboardStatistics() Map~String, Object~
+    }
+
+    class HypeService {
+        +addHype(int submissionId, int studentId) void
+        +removeHype(int submissionId, int studentId) void
+        +getHypeCount(int submissionId) int
+        +hasStudentHyped(int submissionId, int studentId) boolean
+    }
+
+    %% PACKAGE DAO
+    class UserDAO {
+        +save(User user) void
+        +findById(int id) User
+        +findByEmail(String email) User
+        +update(User user) void
+        +delete(int id) void
+    }
+
+    class SubmissionDAO {
+        +save(Submission submission) void
+        +findById(int id) Submission
+        +findByStudent(int studentId) List~Submission~
+        +findAll() List~Submission~
+        +updateStatus(int id, SubmissionStatus status) void
+        +delete(int id) void
+    }
+
+    class StudentReceiptDAO {
+        +createReceipt(int studentId, int submissionId) void
+        +findSubmissionIdsByStudent(int studentId) List~Integer~
+    }
+
+    AuthService ..> UserDAO : uses
+    SubmissionService ..> SubmissionDAO : uses
+    TrackingService ..> SubmissionDAO : uses
+    ReportService ..> SubmissionDAO : uses
+    HypeService ..> SubmissionDAO : uses
+```
+
+---
+
+## 4. Approved UML Sequence Diagram (Slide 11)
+
+The method invocation sequence for an administrator triaging an issue, updating its status, and recording audit history is formalized directly from Slide 11:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Admin
+    participant GUI as AURA GUI
+    participant TS as TrackingService
+    participant DAO as SubmissionDAO
+    participant DB as Supabase DB
+    participant Hist as SubmissionHistory
+
+    Admin->>GUI: selectSubmission()
+    Admin->>GUI: selectNewStatus()
+    GUI->>TS: updateStatus(submissionId, status)
+    TS->>DAO: findById(submissionId)
+    DAO->>DB: SELECT * FROM submissions WHERE submission_id = ?
+    DB-->>DAO: submission data
+    DAO-->>TS: return Submission
+    TS->>DAO: updateStatus(submissionId, status)
+    DAO->>DB: UPDATE submissions SET status = ? WHERE submission_id = ?
+    DB-->>DAO: update successful
+    TS->>Hist: recordChange()
+    Hist->>DB: INSERT INTO submission_history (...) VALUES (...)
+    DB-->>Hist: insert successful
+    TS-->>GUI: status updated
+    GUI-->>Admin: display updated status on dashboard
+```
+
+---
+
+## 5. The Decoupled Anonymity Vault
+
+### Problem with Legacy Implementation:
+In the initial draft, `submissions.student_id` was a foreign key in the submissions table, and the software relied on Java programmers "promising" never to query it in admin methods (`AGENT.md` rule 2). If an administrator opened pgAdmin or DBeaver and ran `SELECT * FROM submissions;`, the student's identity was immediately exposed.
+
+### The Decoupled Vault Solution:
+In our modernized architecture:
+1. **Physical Decoupling:** The `submissions` table has **no `student_id` column whatsoever**.
+2. **Private Receipt Vault:** A separate table `student_submission_receipts` maps `(receipt_id, student_id, submission_id, created_at)`.
+3. **Cryptographic & Architectural Guarantee:**
+   - Administrators query `submissions` directly. Because `student_id` does not exist in that table, administrative code cannot leak student identities even if compromised or misconfigured.
+   - When a student views **"My Submissions"**, `TrackingService` queries `StudentReceiptDAO.findSubmissionIdsByStudent(studentId)` and retrieves only the matching public submissions.
+
+```mermaid
+flowchart LR
+    subgraph StudentFlow [Student Portal]
+        S[Student Session] -->|Queries| SR[student_submission_receipts]
+        SR -->|Joins ID| SUB[submissions table]
+        SUB -->|Renders| MY[My Submissions View]
+    end
+
+    subgraph AdminFlow [Admin Portal]
+        A[Admin Session] -->|Direct Query| SUB
+        SUB -->|Renders| Q[Admin Triage Queue]
+        A -.->|BLOCKED: Zero Reference| SR
+    end
+```
+
+---
+
+## 6. Package & Directory Structure
+
+```
+src/main/java/aura/
+├── Main.java                        # Entry point: sets FlatLaf Dark L&F, opens LoginFrame
+├── config/
+│   └── DatabaseConfig.java          # Reads db.properties, manages TLS JDBC connection pool
+├── model/                           # Plain Domain POJOs (Slide 14)
+│   ├── User.java
+│   ├── Student.java
+│   ├── Admin.java
+│   ├── Submission.java
+│   ├── Issue.java
+│   ├── Suggestion.java
+│   ├── SubmissionHistory.java
+│   ├── ResolutionNote.java
+│   └── SubmissionHype.java
+├── enums/                           # Domain Enumerations (Slide 14)
+│   ├── Role.java
+│   ├── SubmissionType.java
+│   ├── Priority.java
+│   └── SubmissionStatus.java
+├── dao/                             # JDBC Data Access Objects with PreparedStatements
+│   ├── UserDAO.java
+│   ├── SubmissionDAO.java
+│   ├── StudentReceiptDAO.java       # Manages the Decoupled Anonymity Vault
+│   ├── SubmissionHypeDAO.java       # Manages upvotes & trending aggregation
+│   ├── ResolutionNoteDAO.java
+│   └── SubmissionHistoryDAO.java
+├── service/                         # Business Logic & State Transition Services
+│   ├── AuthService.java             # Domain validation & BCrypt authentication
+│   ├── SubmissionService.java       # Submission lifecycle & categorization
+│   ├── TrackingService.java         # State transitions & "My Submissions" resolution
+│   ├── HypeService.java             # Trending scores & one-vote enforcement
+│   └── ReportService.java           # CSV generation & dashboard metrics
+├── ui/                              # FlatLaf Modern Desktop GUI (Slides 20-23)
+│   ├── LoginFrame.java              # Approved Slide 20 Mockup
+│   ├── student/
+│   │   ├── StudentDashboardFrame.java # Approved Slide 21 Mockup
+│   │   └── SubmissionFormPanel.java   # Approved Slide 22 Mockup
+│   └── admin/
+│       ├── AdminDashboardFrame.java   # Approved Slide 23 Mockup
+│       └── ReportPanel.java           # Analytics & CSV export view
+└── util/                            # Cross-Cutting Utilities
+    ├── PasswordUtil.java            # jBCrypt wrapper
+    ├── ValidationUtil.java          # @tkmce.ac.in domain regex & length constraints
+    └── SessionContext.java          # In-memory session holder
+```
+
+---
+
+## 7. Team Responsibility & Module Ownership Matrix (Slide 17)
+
+To satisfy the rubric requirement for **"Substantial individual contribution supported by evidence"**, ownership is divided according to the approved slide assignments from Slide 17 of [`docs/AURA.pdf`](AURA.pdf):
+
+| Team Member | Roll No | Slide Ownership | Technical Modules & Package Ownership |
+|---|---|---|---|
+| **Muhammed Rinshid VP** *(Team Lead)* | B25CS045 | Slides 1–4, 20 | **System Coordination, Core Architecture & Integration:** `aura.Main`, `aura.config.DatabaseConfig`, `aura.ui.LoginFrame`, Supabase cloud configuration. |
+| **Nirmal Binoy** | B25CS052 | Slides 5–8 | **Proposed Solution, Models & Trending Engine:** `aura.model.*`, `aura.enums.*`, `aura.service.HypeService`, `aura.dao.SubmissionHypeDAO`. |
+| **Mohammed Nafih** | B25CS037 | Slides 9–12 | **RBAC, Anonymity Vault & Security Pipeline:** `aura.service.AuthService`, `aura.dao.StudentReceiptDAO`, `aura.util.PasswordUtil`, `aura.util.ValidationUtil`. |
+| **Rahandeep RD** | B25CS053 | Slides 13–14, 18 | **Database Engineering & FlatLaf Desktop GUI:** `sql/schema.sql`, `sql/seed.sql`, `aura.ui.student.*`, `aura.dao.SubmissionDAO`, `aura.dao.UserDAO`. |
+| **Athil Rahuman A** | B25CS084 | Slides 15–17, 19 | **Audit Lifecycle, Admin Dashboard & Analytics:** `aura.service.TrackingService`, `aura.service.ReportService`, `aura.ui.admin.*`, `aura.dao.ResolutionNoteDAO`. |

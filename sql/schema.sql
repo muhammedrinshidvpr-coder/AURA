@@ -1,93 +1,110 @@
--- AURA database schema
--- Mirrors docs/DATABASE.md exactly. If you change one, change the other in the same commit.
--- Target: MySQL 8.x
+-- ============================================================================
+-- AURA (Autonomous University Response and Action) — Supabase PostgreSQL Schema
+-- Department of Computer Science & Engineering, TKM College of Engineering (TKMCE)
+-- 
+-- Compatible with: PostgreSQL 15+ / Supabase Cloud Database
+-- Architecture: Decoupled Anonymity Vault with Role-Based Access Control (RBAC)
+-- ============================================================================
 
-CREATE DATABASE IF NOT EXISTS aura_db
-    CHARACTER SET utf8mb4
-    COLLATE utf8mb4_unicode_ci;
-
-USE aura_db;
-
--- ---------------------------------------------------------------------------
--- users
--- ---------------------------------------------------------------------------
+-- 1. USERS TABLE (Students & Administrators)
 CREATE TABLE IF NOT EXISTS users (
-    user_id       INT AUTO_INCREMENT PRIMARY KEY,
-    name          VARCHAR(100)        NOT NULL,
-    email         VARCHAR(150)        NOT NULL UNIQUE,
-    password_hash VARCHAR(255)        NOT NULL,
-    role          ENUM('STUDENT', 'ADMIN') NOT NULL
+    user_id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    role VARCHAR(20) NOT NULL CHECK (role IN ('STUDENT', 'ADMIN')),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    -- Institutional access constraint: only @tkmce.ac.in emails permitted
+    CONSTRAINT chk_tkmce_domain CHECK (email LIKE '%@tkmce.ac.in')
 );
 
--- ---------------------------------------------------------------------------
--- submissions
--- student_id is a real FK (needed for a student's own "My Submissions" view)
--- but is treated as a service-layer secret by every admin-facing query.
--- See docs/DATABASE.md section 3 and docs/SECURITY.md section 5.
--- ---------------------------------------------------------------------------
+-- 2. SUBMISSIONS TABLE (Anonymous Campus Issues & Suggestions)
+-- CRITICAL ANONYMITY LAW: This table contains NO student_id column.
+-- Even direct administrative database inspection cannot associate an issue with an author.
 CREATE TABLE IF NOT EXISTS submissions (
-    submission_id INT AUTO_INCREMENT PRIMARY KEY,
-    student_id    INT                 NOT NULL,
-    title         VARCHAR(200)        NOT NULL,
-    description   TEXT                NOT NULL,
-    type          ENUM('ISSUE', 'SUGGESTION') NOT NULL,
-    priority      ENUM('LOW', 'MEDIUM', 'HIGH') NOT NULL DEFAULT 'MEDIUM',
-    status        ENUM('PENDING', 'ASSIGNED', 'IN_PROGRESS', 'RESOLVED', 'REJECTED')
-                      NOT NULL DEFAULT 'PENDING',
-    created_at    TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_submissions_student
-        FOREIGN KEY (student_id) REFERENCES users(user_id)
+    submission_id SERIAL PRIMARY KEY,
+    title VARCHAR(200) NOT NULL,
+    description TEXT NOT NULL,
+    type VARCHAR(20) NOT NULL CHECK (type IN ('ISSUE', 'SUGGESTION')),
+    category VARCHAR(50) NOT NULL CHECK (category IN (
+        'IT_INFRASTRUCTURE',
+        'ELECTRICAL',
+        'CIVIL_MAINTENANCE',
+        'ACADEMIC_LABS',
+        'HOSTEL_MESS',
+        'GENERAL'
+    )),
+    location VARCHAR(150) NOT NULL,
+    priority VARCHAR(20) NOT NULL CHECK (priority IN ('LOW', 'MEDIUM', 'HIGH')),
+    status VARCHAR(20) NOT NULL DEFAULT 'PENDING' CHECK (status IN (
+        'PENDING',
+        'ASSIGNED',
+        'IN_PROGRESS',
+        'RESOLVED',
+        'REJECTED'
+    )),
+    photo_url TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- ---------------------------------------------------------------------------
--- submission_history  (audit trail of status transitions)
--- ---------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS submission_history (
-    history_id    INT AUTO_INCREMENT PRIMARY KEY,
-    submission_id INT                 NOT NULL,
-    old_status    VARCHAR(50)         NOT NULL,
-    new_status    VARCHAR(50)         NOT NULL,
-    changed_by    INT                 NOT NULL,
-    changed_at    TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_history_submission
-        FOREIGN KEY (submission_id) REFERENCES submissions(submission_id),
-    CONSTRAINT fk_history_changed_by
-        FOREIGN KEY (changed_by) REFERENCES users(user_id)
+-- 3. STUDENT SUBMISSION RECEIPTS (The Private Anonymity Vault)
+-- Maps ownership so students can view "My Submissions" without exposing identity to admins.
+CREATE TABLE IF NOT EXISTS student_submission_receipts (
+    receipt_id SERIAL PRIMARY KEY,
+    student_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    submission_id INT NOT NULL REFERENCES submissions(submission_id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_receipt_student_submission UNIQUE (student_id, submission_id)
 );
 
--- ---------------------------------------------------------------------------
--- resolution_notes
--- ---------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS resolution_notes (
-    note_id       INT AUTO_INCREMENT PRIMARY KEY,
-    submission_id INT                 NOT NULL,
-    admin_id      INT                 NOT NULL,
-    note          TEXT                NOT NULL,
-    created_at    TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_notes_submission
-        FOREIGN KEY (submission_id) REFERENCES submissions(submission_id),
-    CONSTRAINT fk_notes_admin
-        FOREIGN KEY (admin_id) REFERENCES users(user_id)
-);
-
--- ---------------------------------------------------------------------------
--- submission_hype  (new table — the "hype"/upvote layer)
--- student_id here is the voter, not the poster; this identity relationship
--- is unrelated to submissions.student_id and does not weaken poster anonymity.
--- ---------------------------------------------------------------------------
+-- 4. SUBMISSION HYPE (Upvote System for Trending Priority)
+-- Students upvote campus issues to push high-impact problems to administrative attention.
 CREATE TABLE IF NOT EXISTS submission_hype (
-    hype_id       INT AUTO_INCREMENT PRIMARY KEY,
-    submission_id INT                 NOT NULL,
-    student_id    INT                 NOT NULL,
-    created_at    TIMESTAMP           NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_hype_submission
-        FOREIGN KEY (submission_id) REFERENCES submissions(submission_id),
-    CONSTRAINT fk_hype_student
-        FOREIGN KEY (student_id) REFERENCES users(user_id),
-    CONSTRAINT uq_hype_once_per_student
-        UNIQUE (submission_id, student_id)
+    hype_id SERIAL PRIMARY KEY,
+    submission_id INT NOT NULL REFERENCES submissions(submission_id) ON DELETE CASCADE,
+    student_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uq_hype_once_per_student UNIQUE (submission_id, student_id)
 );
 
--- Index backing the COUNT()-based trending sort (see docs/DATABASE.md section 2
--- for why hype count is computed rather than cached).
-CREATE INDEX idx_hype_submission ON submission_hype (submission_id);
+-- 5. RESOLUTION NOTES (Official Administrative Actions & Outcomes)
+CREATE TABLE IF NOT EXISTS resolution_notes (
+    note_id SERIAL PRIMARY KEY,
+    submission_id INT NOT NULL REFERENCES submissions(submission_id) ON DELETE CASCADE,
+    admin_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    note TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 6. SUBMISSION HISTORY (Auditable Lifecycle Transitions)
+CREATE TABLE IF NOT EXISTS submission_history (
+    history_id SERIAL PRIMARY KEY,
+    submission_id INT NOT NULL REFERENCES submissions(submission_id) ON DELETE CASCADE,
+    old_status VARCHAR(50) NOT NULL,
+    new_status VARCHAR(50) NOT NULL,
+    changed_by INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    changed_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================================================
+-- PERFORMANCE & QUERY OPTIMIZATION INDEXES
+-- ============================================================================
+
+-- Index backing Trending calculation (Hype COUNT aggregation)
+CREATE INDEX IF NOT EXISTS idx_hype_submission ON submission_hype (submission_id);
+
+-- Index backing Recency sort
+CREATE INDEX IF NOT EXISTS idx_submissions_created_at ON submissions (created_at DESC);
+
+-- Indexes backing Administrative Filtering
+CREATE INDEX IF NOT EXISTS idx_submissions_status ON submissions (status);
+CREATE INDEX IF NOT EXISTS idx_submissions_category ON submissions (category);
+CREATE INDEX IF NOT EXISTS idx_submissions_priority ON submissions (priority);
+
+-- Index backing Student "My Submissions" Vault Lookups
+CREATE INDEX IF NOT EXISTS idx_receipts_student ON student_submission_receipts (student_id);
+
+-- Indexes backing Audit & Resolution Queries
+CREATE INDEX IF NOT EXISTS idx_history_submission ON submission_history (submission_id);
+CREATE INDEX IF NOT EXISTS idx_resolution_submission ON resolution_notes (submission_id);

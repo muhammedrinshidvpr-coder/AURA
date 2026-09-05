@@ -1,6 +1,18 @@
-# Copy this file to db.properties (same folder) and fill in your local MySQL credentials.
-# db.properties is git-ignored — never commit real credentials.
+# ============================================================================
+# AURA — Database Configuration Template (Supabase Cloud PostgreSQL)
+# Copy this file to src/main/resources/db.properties and enter your credentials.
+# Never commit real credentials to git!
+# ============================================================================
 
-db.url=jdbc:mysql://localhost:3306/aura_db
-db.user=root
-db.password=changeme
+# Supabase PostgreSQL JDBC Connection URL
+# Replace [YOUR_PROJECT_REF] with your Supabase project reference ID
+db.url=jdbc:postgresql://db.[YOUR_PROJECT_REF].supabase.co:5432/postgres?sslmode=require
+
+# Database User (Default for Supabase is postgres)
+db.user=postgres
+
+# Database Password set during Supabase project creation
+db.password=YOUR_SUPABASE_DATABASE_PASSWORD
+
+# PostgreSQL JDBC Driver
+db.driver=org.postgresql.Driver

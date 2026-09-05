@@ -1,78 +1,90 @@
 # AURA — Autonomous University Response and Action
 
-A campus issue & suggestion platform for **TKM College of Engineering (TKMCE)**. Students report campus problems **anonymously**, other students can **hype** (upvote) a problem to push it up a trending list, and admin staff triage, assign, and resolve reports through a tracked status pipeline.
+> *"REPORT. TRACK. RESOLVE. IMPROVE."*  
+> **Department of Computer Science & Engineering, TKM College of Engineering (TKMCE)**  
+> Academic Course: APJ Abdul Kalam Technological University (KTU) CST205 / CSL203 — Advanced Programming Java Project
 
-> Built as the S3 "Advanced Programming" (KTU CST205/CSL203) course project. See [`docs/`](docs/) for the full design before touching any code.
+---
 
-## Status
+## 1. Project Overview
 
-All 6 roadmap milestones are built: schema, models/enums, DAO layer, service layer, Swing UI, and a passing golden-path walkthrough (see [`docs/PRD.md`](docs/PRD.md) section 6). `mvn test` is green (45 tests) across `aura.dao`, `aura.service`, and `aura.util`. See [`docs/ROADMAP.md`](docs/ROADMAP.md) for what each milestone covers and [`AGENT.md`](AGENT.md) for the rules every coding session (past or future) must follow.
+**AURA** is an enterprise-grade campus issue and suggestion governance platform developed for TKM College of Engineering. It replaces fragmented, untracked channels (WhatsApp groups, paper suggestion boxes, and flat Google Forms) with a structured, transparent, and crowd-prioritized system.
 
-## Read this first
+### Core Value Propositions:
+1. **Anonymous Campus Reporting:** Students can report infrastructural defects and campus suggestions without fear of reprisal. Identity is protected through a **Decoupled Anonymity Vault** at the database level.
+2. **Crowd Prioritization (Hype Engine):** Students upvote issues they also experience, pushing high-impact problems to the top of the **Trending** list.
+3. **5-State Resolution Pipeline:** Transparent administrative lifecycle (`PENDING → ASSIGNED → IN_PROGRESS → RESOLVED / REJECTED`) with official resolution notes visible to students.
+4. **100% Java Desktop Architecture:** Built with **Java 17 (SE)**, modern **FlatLaf** desktop GUI, **JDBC DAO patterns**, and cloud-hosted **Supabase PostgreSQL**.
 
-| Document | What it answers |
-|---|---|
-| [`AGENT.md`](AGENT.md) | The non-negotiable rules for anyone (human or agent) writing code in this repo |
-| [`docs/PRD.md`](docs/PRD.md) | What we're building and why, who it's for |
-| [`docs/TRD.md`](docs/TRD.md) | Tech stack, functional/non-functional requirements, what's explicitly out of scope |
-| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | Layers, package map, class list, boundary rules |
-| [`docs/DATABASE.md`](docs/DATABASE.md) | ER diagram, schema, the anonymity design |
-| [`docs/SECURITY.md`](docs/SECURITY.md) | Auth, SQL-injection stance, anonymity guarantees and their honest limits |
-| [`docs/TESTING.md`](docs/TESTING.md) | What must have a test, and when it gets written |
-| [`docs/ROADMAP.md`](docs/ROADMAP.md) | Build order (milestones, not calendar weeks) |
+---
 
-## Prerequisites
+## 2. Master Documentation Index
 
-- JDK 17
-- Maven 3.9+
-- MySQL 8.x running locally
+Every component of AURA is rigorously documented and directly aligned with the faculty-approved Phase 1 presentation:
 
-## Setup
+| Document | Key Information Answered | Approved Presentation Reference |
+|---|---|---|
+| [`docs/AURA.pdf`](docs/AURA.pdf) | **Official approved Phase 1 presentation deck** (UML Use Cases, Class Diagram, Sequence Diagram, Mockups) | Full 30-Slide Deck |
+| [`AGENT.md`](AGENT.md) | Engineering rules, layer boundaries, and Definition of Done for coding sessions | General |
+| [`docs/PRD.md`](docs/PRD.md) | Problem statement, UN SDGs (16, 11, 9, 4), and UML Use Case Model (Slide 7) | Slides 3–7 |
+| [`docs/TRD.md`](docs/TRD.md) | Technical stack, NFRs, and mapping to KTU CST205/CSL203 syllabus | Slides 2, 15 |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | 4-Layer design, UML Class Diagram (Slide 14), Sequence Diagram (Slide 11), Anonymity Vault | Slides 11–15 |
+| [`docs/DATABASE.md`](docs/DATABASE.md) | Relational ER diagram (Slide 13/24), data dictionary, performance indexes, Supabase setup | Slides 13, 24 |
+| [`docs/SECURITY.md`](docs/SECURITY.md) | Domain gating (`@tkmce.ac.in`), BCrypt hashing, and Anonymity Vault mathematical proof | Slides 9, 10, 16 |
+| [`docs/TESTING.md`](docs/TESTING.md) | Automated JUnit 5 test suites and administrative anonymity regression verification | Slides 15, 28 |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | 10-Week schedule (Slide 28) with Planned vs. Completed verification matrix | Slide 18, 28 |
+
+---
+
+## 3. Team Members & Slide Assignments (Slide 1 & 17)
+
+All deliverables and modules map directly to the approved presentation assignments from Slide 17 of [`docs/AURA.pdf`](docs/AURA.pdf):
+
+| Member | University Reg No | Role | Presentation Slides | Module Ownership |
+|---|---|---|---|---|
+| **Muhammed Rinshid VP** | B25CS045 | **Team Lead** | Slides 1–4, 20 | System Coordination, Core Architecture, Supabase Integration, Presentation Lead |
+| **Nirmal Binoy** | B25CS052 | **Core Developer** | Slides 5–8 | Proposed Solution, UML Class Modeling, Hype/Trending Engine (`HypeService`) |
+| **Mohammed Nafih** | B25CS037 | **Core Developer** | Slides 9–12 | RBAC Security Pipeline, Anonymity Vault (`AuthService`, `StudentReceiptDAO`) |
+| **Rahandeep RD** | B25CS053 | **Database & GUI Engineer** | Slides 13–14, 18 | PostgreSQL Schema (`schema.sql`), FlatLaf Desktop UI (`aura.ui.student.*`, `SubmissionDAO`) |
+| **Athil Rahuman A** | B25CS084 | **Documentation & Process Lead** | Slides 15–17, 19 | Audit Lifecycle (`TrackingService`, `ReportService`), Progress Tracking, CSV Export |
+
+---
+
+## 4. Quickstart Setup Guide
+
+### Prerequisites:
+- **JDK 17** or higher installed and configured on PATH (`java -version`).
+- **Apache Maven 3.9+** (`mvn -version`).
+- **Supabase Cloud Account** or local PostgreSQL 15+ database instance.
+
+### Setup Instructions:
 
 ```bash
-# 1. Create the dev database and a disposable test database (schema.sql is idempotent)
-mysql -u root -p < sql/schema.sql
-sed 's/aura_db/aura_test_db/g' sql/schema.sql | mysql -u root -p
+# 1. Clone repository
+git clone https://github.com/muhammedrinshidvpr-coder/AURA.git
+cd AURA
 
-# 2. (optional) load sample data into aura_db for manual testing
-mysql -u root -p aura_db < sql/seed.sql
+# 2. Apply Database Schema and Seed Data in Supabase SQL Editor
+# Execute sql/schema.sql followed by sql/seed.sql
 
-# 3. Copy the DB config templates and fill in your local credentials
+# 3. Configure Database Credentials
 cp src/main/resources/db.properties.example src/main/resources/db.properties
-cp src/test/resources/db.properties.example src/test/resources/db.properties   # point this at aura_test_db
+# Edit db.properties with your Supabase JDBC connection string and password
 
-# 4. Run the test suite
+# 4. Run Automated Unit & Regression Tests
 mvn test
 
-# 5. Run the app
+# 5. Launch the Modern FlatLaf Desktop Application
 mvn exec:java
 ```
 
-Tests read `src/test/resources/db.properties` (Maven puts `target/test-classes` ahead of
-`target/classes` on the test classpath), so `aura_db` is never touched by `mvn test`.
+---
 
-`db.properties` is git-ignored — never commit real database credentials.
+## 5. Demo Credentials (from Presentation Mockups Slide 21)
 
-## Project layout
-
-```
-AURA/
-├── AGENT.md              # rules for coding sessions
-├── README.md             # this file
-├── pom.xml                # Maven build
-├── docs/                  # PRD, TRD, architecture, database, security, testing, roadmap
-├── sql/                   # schema.sql, seed.sql
-└── src/                   # not created yet — see docs/ARCHITECTURE.md for the planned package map
-```
-
-## Team
-
-| Member | Role | Focus |
-|---|---|---|
-| Muhammed Rinshid VP | Team Lead | Coordination, architecture, integration |
-| Nirmal Binoy | Core Developer | Use-case modeling, class/package design |
-| Mohammed Nafih | Core Developer | RBAC, decision pipeline, admin/student workflow |
-| Rahandeep RD | Database & GUI Engineer | Schema design, Swing UI layouts |
-| Athil Rahuman A | Documentation & Process Lead | Progress tracking, documentation, references |
-
-Department of Computer Science & Engineering, TKM College of Engineering (TKMCE).
+| Persona | Email | Password | Role |
+|---|---|---|---|
+| **Student 1** | `student1@tkmce.ac.in` | `password123` | STUDENT |
+| **Student 2** | `student2@tkmce.ac.in` | `password123` | STUDENT |
+| **Administrator** | `admin@tkmce.ac.in` | `admin123` | ADMIN |
+| **Estate Officer** | `estate@tkmce.ac.in` | `admin123` | ADMIN |

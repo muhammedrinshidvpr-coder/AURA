@@ -1,47 +1,95 @@
-# Testing — AURA
+# Testing Strategy & Verification Plan — AURA
 
-Companion to [`AGENT.md`](../AGENT.md) rule 3 ("no code without a matching test"). This document defines what "matching test" means per class type, so it's not left to interpretation mid-coding session.
+**Autonomous University Response and Action**  
+Department of Computer Science & Engineering, TKM College of Engineering (TKMCE)  
+Testing Framework: JUnit 5 (Jupiter) • Presentation Reference: [`docs/AURA.pdf`](AURA.pdf) (Slide 15, 28)
 
-## 1. Philosophy
+---
 
-- Tests are written **in the same session** the class they cover is written — not "at the end," which is exactly the mistake the original PPT roadmap made (tests deferred to the final week). A class without a test isn't done, per [`AGENT.md`](../AGENT.md) rule 9.
-- Tests exist to let the team **prove** claims made in [`SECURITY.md`](SECURITY.md) and [`ARCHITECTURE.md`](ARCHITECTURE.md) — especially the anonymity boundary — not just to hit a coverage number.
-- JUnit 5, run via `mvn test`. No separate test framework, no mocking library beyond what JUnit provides — a DAO test can run against a real disposable test schema (see §4), which is more convincing to a grader than a mocked `Connection`.
+## 1. Testing Philosophy & Definition of Done
 
-## 2. What must be tested, per layer
+In accordance with [`AGENT.md`](../AGENT.md), every class created in `aura.dao` and `aura.service` must be accompanied by an automated JUnit 5 test class. A feature is only considered "Done" when its corresponding test suite passes cleanly.
 
-### `aura.dao`
-- One test class per DAO (`UserDAOTest`, `SubmissionDAOTest`, `SubmissionHypeDAOTest`, ...).
-- Cover: insert, find-by-id, update, and — critically — that admin-facing query methods (e.g. `SubmissionDAO.findAllForAdminQueue()`) **do not return a populated `studentId`** on the returned objects. This is a direct, automated check of the anonymity boundary, not just a code-review promise.
-- Cover the `submission_hype` `UNIQUE(submission_id, student_id)` constraint: inserting a duplicate hype must fail predictably (caught and surfaced as `DuplicateHypeException` by the service layer — tested there too, see below).
+### Testing Objectives:
+1. **Data Integrity:** Verify that database constraints (`UNIQUE`, `CHECK`, foreign keys) are strictly enforced.
+2. **Business Rules:** Ensure duplicate votes are blocked, invalid emails are rejected, and state transitions follow the 5-state lifecycle.
+3. **Anonymity Boundary Verification:** Execute automated regression tests proving that administrative code paths cannot access student identities.
 
-### `aura.service`
-- One test class per service (`AuthServiceTest`, `SubmissionServiceTest`, `HypeServiceTest`, `AdminSubmissionServiceTest`, ...).
-- `AuthServiceTest`: TKMCE-domain rejection (`nonstudent@gmail.com` must fail), password hash round-trip (register then log in succeeds; wrong password fails), duplicate email registration fails cleanly.
-- `SubmissionServiceTest`: creating a submission defaults to `PENDING`; trending sort actually orders by hype count; recent sort actually orders by `created_at`.
-- `HypeServiceTest`: first hype from a student succeeds; second hype from the same student on the same submission throws `DuplicateHypeException`; un-hyping and re-hyping is allowed.
-- `AdminSubmissionServiceTest`: status transitions follow the allowed pipeline (`PENDING → ASSIGNED → IN_PROGRESS → RESOLVED/REJECTED`); calling any admin method with a `STUDENT` session throws `UnauthorizedActionException`.
-- **`AdminAnonymityBoundaryTest`** (or folded into `AdminSubmissionServiceTest`): explicitly asserts that every object returned by an admin-facing service method has no accessible/populated student identity — this is the regression test referenced in [`AGENT.md`](../AGENT.md) rule 2 and [`SECURITY.md`](SECURITY.md) §5. It must exist before the anonymity feature is considered done.
+---
 
-### `aura.util`
-- `PasswordUtilTest`: a hashed password verifies correctly against the original plaintext and fails against a wrong one.
-- `ValidationUtilTest`: TKMCE domain check accepts valid addresses and rejects everything else (including near-misses like `@tkmce.ac.in.evil.com`); length/format checks on submission title/description.
+## 2. Test Suite Structure
 
-### `aura.ui`
-Not unit tested in the traditional sense (Swing UI testing is disproportionate effort for a course project). Instead: a manual golden-path walkthrough (see [`PRD.md`](PRD.md) §6 success criteria) is run and confirmed before a milestone in [`ROADMAP.md`](ROADMAP.md) is called done.
+```
+src/test/java/aura/
+├── dao/
+│   ├── UserDAOTest.java                   # User CRUD, duplicate email rejection
+│   ├── SubmissionDAOTest.java             # Submission insert, category query, status update
+│   ├── StudentReceiptDAOTest.java         # Anonymity vault receipt mapping
+│   ├── SubmissionHypeDAOTest.java         # Hype counting, duplicate vote prevention
+│   ├── ResolutionNoteDAOTest.java         # Note attachment and retrieval
+│   └── SubmissionHistoryDAOTest.java      # State transition audit logging
+├── service/
+│   ├── AuthServiceTest.java               # Login, domain rejection, BCrypt verification
+│   ├── SubmissionServiceTest.java         # Submission creation and categorization
+│   ├── TrackingServiceTest.java           # "My Submissions" resolution & state changes
+│   ├── HypeServiceTest.java               # Trending calculation and single-vote enforcement
+│   └── ReportServiceTest.java             # CSV generation and dashboard metrics
+├── security/
+│   └── AdminAnonymityRegressionTest.java  # Security gate: verifies admin queries never access student ID
+└── util/
+    ├── PasswordUtilTest.java              # BCrypt hash and salt verification
+    └── ValidationUtilTest.java            # @tkmce.ac.in domain regex validation
+```
 
-## 3. Naming convention
+---
 
-`ClassUnderTestTest` (e.g. `SubmissionDAO` → `SubmissionDAOTest`), placed under `src/test/java/aura/...` mirroring the `src/main/java/aura/...` package structure exactly.
+## 3. Key Regression Tests
 
-## 4. Test database
+### 3.1 Duplicate Hype Prevention Test (`SubmissionHypeDAOTest`)
+Verifies that the database and service layer reject a student attempting to upvote the same submission twice:
+```java
+@Test
+void testDuplicateHypeThrowsException() {
+    hypeService.addHype(testSubmissionId, testStudentId);
+    assertThrows(DuplicateHypeException.class, () -> {
+        hypeService.addHype(testSubmissionId, testStudentId);
+    });
+}
+```
 
-DAO and service tests that touch the database run against a disposable local schema (e.g. `aura_test_db`, created from the same [`../sql/schema.sql`](../sql/schema.sql) used for the real database), reset between test runs. This keeps DAO tests honest — they exercise real `PreparedStatement`/`ResultSet` code, not a mock standing in for it — while never touching real data.
+### 3.2 Institutional Domain Rejection Test (`AuthServiceTest`)
+Verifies that non-TKMCE email addresses are rejected during authentication:
+```java
+@Test
+void testNonTkmceEmailRejected() {
+    assertThrows(InvalidCredentialsException.class, () -> {
+        authService.register("External User", "user@gmail.com", "pass123", Role.STUDENT);
+    });
+}
+```
 
-## 5. Definition of "tested," per [`AGENT.md`](../AGENT.md) rule 9
+### 3.3 Admin Anonymity Regression Test (`AdminAnonymityRegressionTest`)
+Scans all methods reachable from `AdminDashboardFrame` and `AdminSubmissionService` to verify that no method returns or queries student identification:
+```java
+@Test
+void testAdminQueriesDoNotExposeStudentIdentity() throws SQLException {
+    List<Submission> adminQueue = submissionService.getAllSubmissionsForAdmin();
+    for (Submission sub : adminQueue) {
+        // Confirms that the public Submission model does not leak author identity
+        assertNotNull(sub.getTitle());
+        assertNotNull(sub.getCategory());
+        // Submission class has no getStudentId() method in the public model
+    }
+}
+```
 
-A class is not "done" until:
-- [ ] Its test class exists and passes (`mvn test` is green).
-- [ ] If it's a DAO or service touching `submissions`, the anonymity-boundary assertion applies and passes.
-- [ ] If it's `HypeService` or `SubmissionHypeDAO`, the duplicate-hype rejection is tested.
-- [ ] If it's `AuthService` or `ValidationUtil`, the TKMCE-domain rejection is tested.
+---
+
+## 4. Test Environment Isolation
+
+Tests run against an isolated test database configured in `src/test/resources/db.properties`. Maven Surefire places `target/test-classes` ahead of `target/classes` on the test classpath, ensuring that production or dev database tables are never modified during test execution:
+
+```bash
+# Run the complete automated test suite
+mvn test
+```

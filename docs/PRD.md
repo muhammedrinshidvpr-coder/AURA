@@ -1,80 +1,133 @@
 # Product Requirements Document (PRD) — AURA
 
-**Autonomous University Response and Action**
-*"Report. Track. Resolve. Improve."*
+**Autonomous University Response and Action**  
+*"REPORT. TRACK. RESOLVE. IMPROVE."*  
+Department of Computer Science & Engineering, TKM College of Engineering (TKMCE)  
+Academic Reference: KTU CST205 / CSL203 • Presentation Reference: [`docs/AURA.pdf`](AURA.pdf)
 
-Department of Computer Science & Engineering, TKM College of Engineering (TKMCE)
+---
 
-## 1. Problem statement
+## 1. Executive Summary & Problem Statement
 
-Campus issues at TKMCE currently travel through informal, untracked channels:
+Campus issues at TKM College of Engineering (TKMCE) currently travel through fragmented, untracked channels that create administrative bottlenecks and student dissatisfaction (Slide 3 & 5):
 
-| Channel | Centralized? | Live tracking? | Role security? | Primary limitation |
+| Channel | Centralized? | Live Tracking? | Role Security? | Primary Limitation |
 |---|---|---|---|---|
-| WhatsApp / messaging | No | No | No | Unstructured, messages lost in group chats |
-| Paper suggestion boxes | Partial | No | No | Delayed collection, zero feedback to the student |
-| Google Forms | Yes | No | Basic | Flat sheet, no resolution lifecycle |
+| **WhatsApp / Messaging** | No | No | No | Unstructured, messages buried in chat groups, zero accountability. |
+| **Paper Suggestion Boxes** | Partial | No | No | Infrequent physical collection, zero feedback loop to the student. |
+| **Google Forms** | Yes | No | Basic | Flat spreadsheet, lacks status lifecycle, role routing, or upvoting. |
+| **AURA Platform** | **Yes (Java SE)** | **Yes (5-State)** | **Yes (RBAC)** | **Purpose-built, anonymous campus governance system.** |
 
-Three consequences follow directly from this:
+### Consequences of the Status Quo:
+1. **Reporting Hesitation:** Students avoid reporting real infrastructural or sensitive issues because informal channels lack anonymity and visible action.
+2. **Squeaky-Wheel Bias:** Administrative attention goes to whoever shouts the loudest, rather than issues that affect hundreds of students simultaneously.
+3. **Reactive Maintenance:** Campus administrators lack aggregated data on recurring infrastructural failures (e.g., specific lab projectors or water supply lines).
 
-1. **Students don't report** minor-but-real problems (a broken projector, faulty Wi-Fi) because there's no visible payoff — nothing shows the report was seen, let alone fixed.
-2. **The problems that get attention are the loudest, not the most common.** A single vocal complaint to the right person can jump the queue while a problem affecting 200 students goes unreported anywhere central.
-3. **Admin staff have no aggregated view** of what's actually recurring across campus, so maintenance stays reactive instead of prioritized by real impact.
+---
 
-## 2. What AURA is
+## 2. Alignment with UN Sustainable Development Goals (SDG - Slide 4)
 
-A single desktop platform (Java Swing) where:
+As presented in Slide 4 of [`docs/AURA.pdf`](AURA.pdf), AURA aligns directly with United Nations SDGs:
 
-- Students **report problems and suggestions anonymously** — no name attached, ever, not even to admin.
-- Other students can **hype** (upvote) a report they also care about, surfacing the most-affecting problems to the top of a **Trending** view — this is the direct fix for consequence #2 above.
-- Admin staff **triage, assign, and resolve** reports through a tracked status pipeline, with resolution notes visible back to students.
-- Every student can always see the status of **their own** reports, even though nobody — including admin — can trace a report back to who posted it.
+- **SDG 16 (Peace, Justice and Strong Institutions):** Promotes transparent, accountable campus governance by providing a structured channel for reporting problems, tracking actions, and recording resolutions.
+- **SDG 11 (Sustainable Cities and Communities):** Enhances campus infrastructure, safety, water access, and facility maintenance through crowd-verified reporting.
+- **SDG 9 (Industry, Innovation and Infrastructure):** Replaces archaic paper/chat communication with a modern digital lifecycle platform.
+- **SDG 4 (Quality Education):** Minimizes disruptions in laboratories, smart classrooms, and libraries, creating a supportive learning environment.
 
-This is **not** a public app. It is scoped to one institution: only verified TKMCE identities (`@tkmce.ac.in`) can register or log in.
+---
 
-## 3. Users
+## 3. Approved UML Use Case Model (Slide 7)
 
-### Student
-- Submits an **Issue** (a problem) or a **Suggestion** (an improvement idea), anonymously.
-- Sets a priority (Low / Medium / High) and a short title + description.
-- Browses other students' submissions, sorted by **Trending** (hype count) or **Recent**.
-- Hypes submissions they also experience or support — one hype per student per submission.
-- Views **My Submissions**: their own reports and current status, regardless of who else can see it.
-- Reads resolution notes once an admin resolves their report.
+The functional boundary of AURA is formalized below directly from Slide 7 of [`docs/AURA.pdf`](AURA.pdf):
 
-### Admin
-- Reviews the incoming queue, sorted by priority/hype/date.
-- Assigns a submission to a responsible staff area and updates its status (`ASSIGNED` → `IN_PROGRESS`).
-- Adds a resolution note and marks a submission `RESOLVED` (or `REJECTED` with a reason).
-- Generates a simple report (CSV export) of submissions/resolutions for record-keeping.
-- **Cannot** see who authored any submission — the anonymity guarantee applies to admin too (see [`SECURITY.md`](SECURITY.md) for exactly how, and its honest limits).
+```mermaid
+flowchart LR
+    Student((Student))
+    Admin((Admin))
 
-## 4. Core user stories
+    subgraph AURA_System ["AURA — Autonomous University Response and Action"]
+        UC1([1. Login])
+        UC2([2. Submit Issue])
+        UC3([3. Submit Suggestion])
+        UC4([4. View My Submissions])
+        UC5([5. Track Submission Status])
+        UC5a([5a. Check Notification])
+        UC5b([5b. Receive Update])
+        UC6([6. View Resolution Details])
+        UC7([7. Logout])
 
-1. As a student, I can submit a problem or suggestion without my identity being attached to it, so I can report sensitive issues without hesitation.
-2. As a student, I can see how many other students hyped a submission, so I know if a problem is affecting others too.
-3. As a student, I can hype a submission once, so the count reflects real distinct support, not repeat clicks.
-4. As a student, I can see the status and any resolution note for reports I personally submitted, so I know something actually happened.
-5. As an admin, I can see all submissions sorted by priority, hype, or recency, so I triage by real impact, not by who shouted loudest.
-6. As an admin, I can assign, update status, and record a resolution note, so there's an auditable trail per submission.
-7. As an admin, I can export a report of submissions/resolutions, so campus maintenance decisions are backed by data.
+        UC9([9. View All Submissions])
+        UC10([10. Review Submission])
+        UC11([11. Assign Submission])
+        UC12([12. Update Submission Status])
+        UC12a([12a. Escalate Issue])
+        UC12b([12b. Add Internal Comment])
+        UC13([13. Add Resolution Note])
+        UC14([14. View Dashboard])
+        UC15([15. Generate Reports])
+        UC16([16. Logout])
+    end
 
-## 5. Non-goals for this version
+    Student --> UC2
+    Student --> UC3
+    Student --> UC4
+    Student --> UC5
+    Student --> UC6
+    Student --> UC7
 
-Kept out deliberately, to stay demoable within the project's real timeline (see [`ROADMAP.md`](ROADMAP.md)) and defensible as a course project rather than an open-ended product:
+    Admin --> UC9
+    Admin --> UC10
+    Admin --> UC11
+    Admin --> UC12
+    Admin --> UC13
+    Admin --> UC14
+    Admin --> UC15
+    Admin --> UC16
 
-- No comment threads or replies on submissions (hype only — a single, simple signal).
-- No push notifications / email alerts.
-- No mobile app — desktop Swing client only.
-- No multi-institution support — TKMCE only, by design (see login gate in [`SECURITY.md`](SECURITY.md)).
-- No public/unauthenticated access — every screen requires a logged-in TKMCE identity.
+    UC2 -.->|<<include>>| UC1
+    UC3 -.->|<<include>>| UC1
+    UC4 -.->|<<include>>| UC1
+    UC5 -.->|<<include>>| UC1
 
-## 6. Success criteria
+    UC5 -.->|<<extend>>| UC5a
+    UC5 -.->|<<extend>>| UC5b
 
-The project is successful when a single, uninterrupted walkthrough works end-to-end:
+    UC9 -.->|<<include>>| UC1
+    UC10 -.->|<<include>>| UC1
+    UC11 -.->|<<include>>| UC1
+    UC12 -.->|<<include>>| UC1
+    UC13 -.->|<<include>>| UC1
 
-1. A student registers/logs in with a TKMCE identity, submits an issue, and sees it appear in their "My Submissions" list as `PENDING`.
-2. A second student logs in, sees the same issue in the Trending/Recent list (with no author name), and hypes it.
-3. An admin logs in, sees the issue in the queue (again, with no author name), assigns it, moves it through `IN_PROGRESS`, and resolves it with a note.
-4. The original student's dashboard reflects `RESOLVED` and shows the resolution note.
-5. At no point in this walkthrough does any admin-facing screen, query log, or exported report reveal which student authored the issue.
+    UC12 -.->|<<extend>>| UC12a
+    UC12 -.->|<<extend>>| UC12b
+```
+
+---
+
+## 4. User Personas & Workflows
+
+### 4.1 Student Persona
+- **Authentication:** Verified via institutional `@tkmce.ac.in` domain.
+- **Anonymous Reporting:** Submits an `ISSUE` (a defect/failure) or `SUGGESTION` (an institutional proposal) without author identity attached to the public record.
+- **Granular Details:** Selects Category (`IT_INFRASTRUCTURE`, `ELECTRICAL`, `CIVIL_MAINTENANCE`, `ACADEMIC_LABS`, `HOSTEL_MESS`, `GENERAL`), Priority (`LOW`, `MEDIUM`, `HIGH`), Campus Location (e.g., "CSE Lab 3"), and optional photo attachment.
+- **Crowd Upvoting (Hype):** Upvotes peer submissions once per student. Submissions with high hype rise to the top of the **Trending** feed.
+- **My Submissions Vault:** Tracks personal reports and views official resolution notes via the isolated Private Receipt Vault.
+
+### 4.2 Administrator Persona
+- **Triage Queue:** Views all campus submissions sorted by Trending (Hype count), Priority, or Recency without ever seeing student identities.
+- **Lifecycle Management:** Transitions tickets through the 5-state lifecycle:
+  `PENDING → ASSIGNED → IN_PROGRESS → RESOLVED / REJECTED`.
+- **Resolution Notes:** Attaches official resolution explanations visible back to the student body.
+- **Analytics & Reporting:** Generates CSV exports and reviews status distributions for proactive maintenance.
+
+---
+
+## 5. Phase 2 Presentation Success Criteria (The Golden-Path Walkthrough)
+
+To achieve the maximum score on the presentation rubric, the application must execute the uninterrupted Golden-Path Walkthrough live before the examiners:
+
+1. **Student 1 Login & Report:** `student1@tkmce.ac.in` logs in, submits an anonymous issue for a broken projector in *"CSE Lab 3"*, and sees it appear under "My Submissions" as `PENDING`.
+2. **Student 2 Discovery & Hype:** `student2@tkmce.ac.in` logs in, views the public feed, sees the projector issue with no author name attached, and clicks "Hype". The hype counter increments live.
+3. **Admin Triage & State Transition:** `admin@tkmce.ac.in` logs in, reviews the top-trending issue (verifying no student name exists), transitions the ticket to `IN_PROGRESS`, and records an official resolution note.
+4. **Student Feedback Verification:** Student 1 refreshes their "My Submissions" panel, observing the status updated to `RESOLVED` along with the administrative resolution note.
+5. **Anonymity Audit:** Direct inspection of the database proves that the `submissions` table contains zero author fields.
