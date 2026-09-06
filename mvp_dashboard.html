@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AURA MVP Interactive Prototype — Student & Admin Windows</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #0b0f17;
+      --bg-surface: #111827;
+      --bg-card: #1f2937;
+      --bg-card-hover: #263345;
+      --border-color: #374151;
+      --border-subtle: #1e293b;
+      
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --primary-glow: rgba(99, 102, 241, 0.25);
+      
+      --accent-flame: #f97316;
+      --accent-flame-glow: rgba(249, 115, 22, 0.25);
+      
+      --status-pending: #f59e0b;
+      --status-pending-bg: rgba(245, 158, 11, 0.12);
+      --status-assigned: #38bdf8;
+      --status-assigned-bg: rgba(56, 189, 248, 0.12);
+      --status-resolved: #10b981;
+      --status-resolved-bg: rgba(16, 185, 129, 0.12);
+      --status-rejected: #ef4444;
+      --status-rejected-bg: rgba(239, 68, 68, 0.12);
+
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-subtle: #6b7280;
+      
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --radius-xl: 18px;
+      
+      --shadow-win: 0 20px 40px -10px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08);
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background: radial-gradient(circle at 50% 0%, #171e2e 0%, var(--bg-base) 75%);
+      color: var(--text-main);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Top Master Switcher Bar */
+    .master-bar {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(11, 15, 23, 0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .master-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 1.15rem;
+      letter-spacing: -0.02em;
+    }
+
+    .master-logo span {
+      background: linear-gradient(135deg, #818cf8, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .master-badge {
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      color: #a5b4fc;
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+    }
+
+    .view-toggles {
+      display: flex;
+      background: #111827;
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      gap: 4px;
+    }
+
+    .toggle-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+    }
+
+    .toggle-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .toggle-btn.active {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 2px 8px var(--primary-glow);
+    }
+
+    .sync-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: #34d399;
+      background: rgba(16, 185, 129, 0.1);
+      padding: 5px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    .sync-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #34d399;
+      box-shadow: 0 0 8px #34d399;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    /* Main Workspace Container */
+    .workspace-area {
+      flex: 1;
+      padding: 24px;
+      display: grid;
+      gap: 24px;
+      transition: var(--transition);
+    }
+
+    .workspace-area.mode-dual {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .workspace-area.mode-student {
+      grid-template-columns: 1fr;
+      max-width: 1080px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .workspace-area.mode-admin {
+      grid-template-columns: 1fr;
+      max-width: 1160px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Desktop Window Container (Simulating FlatLaf OS Window) */
+    .os-window {
+      background: var(--bg-surface);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-win);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 680px;
+      position: relative;
+    }
+
+    .os-titlebar {
+      background: #0d131f;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+    }
+
+    .os-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .os-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+    }
+    .os-dot.red { background: #ff5f56; }
+    .os-dot.yellow { background: #ffbd2e; }
+    .os-dot.green { background: #27c93f; }
+
+    .os-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .os-title-badge {
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .badge-student { background: rgba(99, 102, 241, 0.2); color: #a5b4fc; }
+    .badge-admin { background: rgba(245, 158, 11, 0.2); color: #fde68a; }
+
+    .os-body {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      position: relative;
+    }
+
+    /* Common Components */
+    .top-subbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .user-profile-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      background: #182234;
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .user-avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--primary);
+      display: grid;
+      place-items: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: white;
+      border: none;
+      padding: 9px 18px;
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 12px var(--primary-glow);
+      transition: var(--transition);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    /* Student Window Specifics */
+    .feed-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: #151d2c;
+      padding: 8px 12px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .sort-group {
+      display: flex;
+      gap: 4px;
+    }
+
+    .sort-tab {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition);
+    }
+
+    .sort-tab.active {
+      background: #1e293b;
+      color: var(--text-main);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+
+    /* Card Feed */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px;
+    }
+
+    .issue-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .issue-card:hover {
+      border-color: #4b5563;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px -6px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .category-chip {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .cat-electrical { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+    .cat-it { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+    .cat-civil { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+    .cat-labs { background: rgba(236, 72, 153, 0.15); color: #f472b6; }
+    .cat-general { background: rgba(156, 163, 175, 0.15); color: #e5e7eb; }
+
+    .status-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 999px;
+      letter-spacing: 0.03em;
+    }
+    .status-PENDING { background: var(--status-pending-bg); color: var(--status-pending); border: 1px solid rgba(245, 158, 11, 0.3); }
+    .status-ASSIGNED { background: var(--status-assigned-bg); color: var(--status-assigned); border: 1px solid rgba(56, 189, 248, 0.3); }
+    .status-RESOLVED { background: var(--status-resolved-bg); color: var(--status-resolved); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .status-REJECTED { background: var(--status-rejected-bg); color: var(--status-rejected); border: 1px solid rgba(239, 68, 68, 0.3); }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-main);
+      line-height: 1.35;
+    }
+
+    .card-meta {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .card-location {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      color: #93c5fd;
+    }
+
+    .card-description {
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      line-height: 1.45;
+      background: #141c2b;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+      padding-top: 8px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .time-tag {
+      font-size: 0.72rem;
+      color: var(--text-subtle);
+    }
+
+    /* Hype Button */
+    .hype-btn {
+      background: rgba(249, 115, 22, 0.1);
+      border: 1px solid rgba(249, 115, 22, 0.3);
+      color: #fdba74;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition);
+      user-select: none;
+    }
+
+    .hype-btn:hover {
+      background: rgba(249, 115, 22, 0.2);
+      border-color: var(--accent-flame);
+      transform: scale(1.04);
+      box-shadow: 0 0 14px var(--accent-flame-glow);
+    }
+
+    .hype-btn.hyped {
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      color: #fff;
+      border-color: #f97316;
+      box-shadow: 0 4px 12px var(--accent-flame-glow);
+    }
+
+    .flame-icon {
+      font-size: 1rem;
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .hype-btn:hover .flame-icon {
+      transform: scale(1.2) rotate(6deg);
+    }
+
+    /* Slide-out Report Problem Modal/Drawer */
+    .drawer-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(4px);
+      z-index: 50;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .drawer-backdrop.open {
+      display: flex;
+    }
+
+    .report-drawer {
+      background: #1a2234;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      width: 100%;
+      max-width: 520px;
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(40px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .drawer-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 4px;
+    }
+    .close-btn:hover { color: #fff; }
+
+    .vault-banner {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.75rem;
+      color: #6ee7b7;
+      line-height: 1.4;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .form-input, .form-select, .form-textarea {
+      background: #0f1523;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      color: var(--text-main);
+      padding: 10px 14px;
+      font-size: 0.85rem;
+      font-family: inherit;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    /* Admin Window Specifics */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .kpi-card {
+      background: #141d2d;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .kpi-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--radius-md);
+      display: grid;
+      place-items: center;
+      font-size: 1.1rem;
+    }
+    .kpi-icon.pending { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+    .kpi-icon.approved { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+    .kpi-icon.top { background: rgba(249, 115, 22, 0.15); color: #fb923c; }
+
+    .kpi-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .kpi-value {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .kpi-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Admin Tabs */
+    .admin-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+      gap: 8px;
+    }
+
+    .admin-tab {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 10px 18px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+    }
+
+    .admin-tab:hover {
+      color: #fff;
+    }
+
+    .admin-tab.active {
+      color: #fff;
+    }
+
+    .admin-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--primary);
+      box-shadow: 0 0 10px var(--primary);
+    }
+
+    .tab-counter {
+      background: #1f293d;
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 999px;
+      color: var(--text-muted);
+    }
+
+    .admin-tab.active .tab-counter {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    /* Admin Triage Table */
+    .triage-table-wrap {
+      background: #141c2c;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow-x: auto;
+    }
+
+    .triage-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.82rem;
+    }
+
+    .triage-table th {
+      background: #101622;
+      padding: 12px 14px;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-subtle);
+      font-weight: 700;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .triage-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      vertical-align: middle;
+    }
+
+    .triage-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .hype-score-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(249, 115, 22, 0.12);
+      color: #fb923c;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+    }
+
+    /* Action Buttons in Admin Row */
+    .action-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-action-approve {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #34d399;
+      padding: 5px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: var(--transition);
+    }
+
+    .btn-action-approve:hover {
+      background: #10b981;
+      color: #fff;
+      box-shadow: 0 2px 10px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-action-reject {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      color: #f87171;
+      padding: 5px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-action-reject:hover {
+      background: #ef4444;
+      color: #fff;
+    }
+
+    .empty-state {
+      padding: 40px 20px;
+      text-align: center;
+      color: var(--text-subtle);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .empty-icon {
+      font-size: 2rem;
+      opacity: 0.5;
+    }
+
+    /* Workflow notification toast */
+    .toast-box {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1f293d;
+      border: 1px solid var(--primary);
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      font-size: 0.85rem;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      z-index: 2000;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- MASTER VIEW SWITCHER BAR -->
+  <header class="master-bar">
+    <div class="master-logo">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M2 17L12 22L22 17" stroke="#818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M2 12L12 17L22 12" stroke="#818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      AURA <span>MVP Live Model</span>
+      <span class="master-badge">TKMCE CST205</span>
+    </div>
+
+    <!-- Switch between Student, Admin, and Side-by-Side Dual screen -->
+    <div class="view-toggles">
+      <button class="toggle-btn active" id="btn-view-dual" onclick="setViewMode('dual')">
+        <span>⚡</span> Side-by-Side Dual View
+      </button>
+      <button class="toggle-btn" id="btn-view-student" onclick="setViewMode('student')">
+        <span>🎓</span> Student Window
+      </button>
+      <button class="toggle-btn" id="btn-view-admin" onclick="setViewMode('admin')">
+        <span>🛡️</span> Admin Window
+      </button>
+    </div>
+
+    <div class="sync-status">
+      <div class="sync-dot"></div>
+      <span>Decoupled Vault In-Memory Sync</span>
+    </div>
+  </header>
+
+  <!-- MAIN WORKSPACE CONTAINER -->
+  <main class="workspace-area mode-dual" id="workspace">
+
+    <!-- ========================================================================= -->
+    <!-- 1. STUDENT DASHBOARD WINDOW                                               -->
+    <!-- ========================================================================= -->
+    <section class="os-window" id="win-student">
+      <!-- Title Bar -->
+      <div class="os-titlebar">
+        <div class="os-controls">
+          <div class="os-dot red"></div>
+          <div class="os-dot yellow"></div>
+          <div class="os-dot green"></div>
+        </div>
+        <div class="os-title">
+          <span>AURA — Student Portal</span>
+          <span class="os-title-badge badge-student">ANONYMOUS VAULT ACTIVE</span>
+        </div>
+        <div style="width: 45px;"></div>
+      </div>
+
+      <!-- Window Body -->
+      <div class="os-body">
+        <!-- Student Header Bar -->
+        <div class="top-subbar">
+          <div class="user-profile-pill">
+            <div class="user-avatar">S</div>
+            <span>student1@tkmce.ac.in</span>
+          </div>
+          <button class="btn-primary" id="btn-open-report" onclick="openReportDrawer()">
+            <span style="font-size: 1.1rem; line-height: 1;">+</span> Report Problem
+          </button>
+        </div>
+
+        <!-- Feed Sort & Filter Controls -->
+        <div class="feed-controls">
+          <div class="sort-group">
+            <button class="sort-tab active" id="sort-hype-btn" onclick="setStudentSort('hype')">
+              <span>🔥</span> Most Hyped
+            </button>
+            <button class="sort-tab" id="sort-recent-btn" onclick="setStudentSort('recent')">
+              <span>🕒</span> Newest
+            </button>
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-muted);" id="student-count-indicator">
+            Loading issues...
+          </span>
+        </div>
+
+        <!-- Problem Cards Feed Grid -->
+        <div class="cards-grid" id="student-feed-container">
+          <!-- Dynamically populated via JS -->
+        </div>
+
+        <!-- SLIDE-OVER REPORT PROBLEM MODAL / DRAWER -->
+        <div class="drawer-backdrop" id="report-drawer-backdrop" onclick="closeDrawerOnOutside(event)">
+          <div class="report-drawer" onclick="event.stopPropagation()">
+            <div class="drawer-header">
+              <h3 class="drawer-title">Report Campus Problem</h3>
+              <button class="close-btn" onclick="closeReportDrawer()">&times;</button>
+            </div>
+
+            <!-- Anonymity Proof Banner -->
+            <div class="vault-banner">
+              <span style="font-size: 1.2rem;">🛡️</span>
+              <div>
+                <strong>Decoupled Anonymity Vault:</strong> Your identity is never stored with this issue. Admins will only see the problem details and crowd hype.
+              </div>
+            </div>
+
+            <form id="report-form" onsubmit="handleStudentSubmit(event)" style="display: flex; flex-direction: column; gap: 12px;">
+              <div class="form-group">
+                <label class="form-label" for="prob-title">Problem Title *</label>
+                <input class="form-input" id="prob-title" required placeholder="e.g., AC Failure in Lab 3 or Wi-Fi Disconnects" />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="prob-cat">Department Category *</label>
+                <select class="form-select" id="prob-cat" required>
+                  <option value="ELECTRICAL">Electrical Maintenance</option>
+                  <option value="IT_INFRASTRUCTURE">IT & Networking</option>
+                  <option value="CIVIL_MAINTENANCE">Civil Maintenance</option>
+                  <option value="ACADEMIC_LABS">Academic Labs</option>
+                  <option value="HOSTEL_MESS">Hostel & Mess</option>
+                  <option value="GENERAL">General Campus</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="prob-loc">Campus Location *</label>
+                <input class="form-input" id="prob-loc" required placeholder="e.g., Main Block Room 204 or CSE Lab 2" />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="prob-desc">Detailed Description *</label>
+                <textarea class="form-textarea" id="prob-desc" required placeholder="Describe what is broken, safety concerns, or details to help technicians..."></textarea>
+              </div>
+
+              <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px;">
+                <button type="button" class="btn-action-reject" style="padding: 9px 16px;" onclick="closeReportDrawer()">Cancel</button>
+                <button type="submit" class="btn-primary">Submit Anonymously</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- 2. ADMIN DASHBOARD WINDOW                                                 -->
+    <!-- ========================================================================= -->
+    <section class="os-window" id="win-admin">
+      <!-- Title Bar -->
+      <div class="os-titlebar">
+        <div class="os-controls">
+          <div class="os-dot red"></div>
+          <div class="os-dot yellow"></div>
+          <div class="os-dot green"></div>
+        </div>
+        <div class="os-title">
+          <span>AURA — Administrator Triage Portal</span>
+          <span class="os-title-badge badge-admin">ESTATE / ADMIN ROLE</span>
+        </div>
+        <div style="width: 45px;"></div>
+      </div>
+
+      <!-- Window Body -->
+      <div class="os-body">
+        <!-- Admin Subbar -->
+        <div class="top-subbar">
+          <div class="user-profile-pill">
+            <div class="user-avatar" style="background: #f59e0b;">A</div>
+            <span>admin@tkmce.ac.in</span>
+          </div>
+          <div style="font-size: 0.75rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">
+            MODE: 1-Click Quick Triage
+          </div>
+        </div>
+
+        <!-- Metric KPI Cards -->
+        <div class="kpi-row">
+          <div class="kpi-card">
+            <div class="kpi-icon pending">📋</div>
+            <div class="kpi-info">
+              <span class="kpi-value" id="kpi-pending-count">0</span>
+              <span class="kpi-label">Pending Approval</span>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon approved">✅</div>
+            <div class="kpi-info">
+              <span class="kpi-value" id="kpi-approved-count">0</span>
+              <span class="kpi-label">Approved & Assigned</span>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon top">🔥</div>
+            <div class="kpi-info">
+              <span class="kpi-value" id="kpi-top-hype">0</span>
+              <span class="kpi-label">Top Crowd Hype</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Triage Queue Tabs -->
+        <div class="admin-tabs">
+          <button class="admin-tab active" id="tab-btn-pending" onclick="setAdminTab('PENDING')">
+            Pending Approval <span class="tab-counter" id="tab-counter-pending">0</span>
+          </button>
+          <button class="admin-tab" id="tab-btn-assigned" onclick="setAdminTab('ASSIGNED')">
+            Approved / Assigned <span class="tab-counter" id="tab-counter-assigned">0</span>
+          </button>
+        </div>
+
+        <!-- Triage Table -->
+        <div class="triage-table-wrap">
+          <table class="triage-table">
+            <thead>
+              <tr>
+                <th>Issue Headline</th>
+                <th>Category</th>
+                <th>Location</th>
+                <th>Crowd Hype</th>
+                <th>Current Status</th>
+                <th style="text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="admin-table-body">
+              <!-- Dynamically populated via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Notification Toast -->
+  <div class="toast-box" id="toast">
+    <span id="toast-icon">⚡</span>
+    <span id="toast-msg">Action updated</span>
+  </div>
+
+  <script>
+    // =========================================================================
+    // STATE STORE — In-Memory Synchronized Store for MVP Prototype
+    // =========================================================================
+    let issues = [
+      {
+        id: 101,
+        title: "Air Conditioning Failure in CSE Lab 2",
+        category: "ELECTRICAL",
+        location: "Main Block Room 204",
+        description: "Both split AC units in Lab 2 stopped blowing cold air. Afternoon lab sessions are unbearable with 35C heat.",
+        hypeCount: 42,
+        hypedByMe: false,
+        status: "PENDING",
+        createdAgo: "2 hours ago",
+        timestamp: Date.now() - 2 * 3600 * 1000
+      },
+      {
+        id: 102,
+        title: "Wi-Fi Dead Zone near 2nd Floor Library Stacks",
+        category: "IT_INFRASTRUCTURE",
+        location: "Library 2nd Floor",
+        description: "Eduroam and campus Wi-Fi signal drops completely between book aisles 14 to 22.",
+        hypeCount: 28,
+        hypedByMe: true,
+        status: "PENDING",
+        createdAgo: "3 hours ago",
+        timestamp: Date.now() - 3 * 3600 * 1000
+      },
+      {
+        id: 103,
+        title: "Broken Water Tap causing continuous leak in Canteen",
+        category: "CIVIL_MAINTENANCE",
+        location: "Canteen Wash Area",
+        description: "Valve spindle worn out, continuous water flow causing slippery floor hazard for students.",
+        hypeCount: 64,
+        hypedByMe: false,
+        status: "ASSIGNED",
+        createdAgo: "5 hours ago",
+        timestamp: Date.now() - 5 * 3600 * 1000
+      },
+      {
+        id: 104,
+        title: "HDMI Cable Handshake Flickering in LH 201",
+        category: "ACADEMIC_LABS",
+        location: "Lecture Hall 201",
+        description: "The podium HDMI connector flickers every few minutes during CST205 lectures.",
+        hypeCount: 15,
+        hypedByMe: false,
+        status: "PENDING",
+        createdAgo: "6 hours ago",
+        timestamp: Date.now() - 6 * 3600 * 1000
+      }
+    ];
+
+    let studentSort = 'hype'; // 'hype' or 'recent'
+    let adminTab = 'PENDING'; // 'PENDING' or 'ASSIGNED'
+
+    // =========================================================================
+    // RENDER FUNCTIONS
+    // =========================================================================
+
+    function getCategoryClass(cat) {
+      switch (cat) {
+        case 'ELECTRICAL': return 'cat-electrical';
+        case 'IT_INFRASTRUCTURE': return 'cat-it';
+        case 'CIVIL_MAINTENANCE': return 'cat-civil';
+        case 'ACADEMIC_LABS': return 'cat-labs';
+        default: return 'cat-general';
+      }
+    }
+
+    function formatCategoryName(cat) {
+      return cat.replace('_', ' ');
+    }
+
+    function renderStudentFeed() {
+      const container = document.getElementById('student-feed-container');
+      const counter = document.getElementById('student-count-indicator');
+      
+      let sorted = [...issues];
+      if (studentSort === 'hype') {
+        sorted.sort((a, b) => b.hypeCount - a.hypeCount);
+      } else {
+        sorted.sort((a, b) => b.timestamp - a.timestamp);
+      }
+
+      counter.textContent = `${sorted.length} Campus Issues Live`;
+
+      if (sorted.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1;">
+            <div class="empty-icon">📭</div>
+            <p>No issues reported yet. Click "+ Report Problem" to be the first!</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = sorted.map(issue => `
+        <div class="issue-card" id="card-${issue.id}">
+          <div class="card-top">
+            <span class="category-chip ${getCategoryClass(issue.category)}">${formatCategoryName(issue.category)}</span>
+            <span class="status-badge status-${issue.status}">${issue.status}</span>
+          </div>
+
+          <h4 class="card-title">${escapeHtml(issue.title)}</h4>
+
+          <div class="card-meta">
+            <span class="card-location">
+              <span>📍</span> ${escapeHtml(issue.location)}
+            </span>
+          </div>
+
+          <p class="card-description">${escapeHtml(issue.description)}</p>
+
+          <div class="card-footer">
+            <span class="time-tag">🕒 ${issue.createdAgo}</span>
+            <button class="hype-btn ${issue.hypedByMe ? 'hyped' : ''}" onclick="toggleHype(${issue.id})" title="Upvote this issue">
+              <span class="flame-icon">🔥</span>
+              <span id="hype-text-${issue.id}">${issue.hypedByMe ? 'Hyped' : 'Hype'} (${issue.hypeCount})</span>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderAdminDashboard() {
+      // 1. Update KPI Counts
+      const pendingIssues = issues.filter(i => i.status === 'PENDING');
+      const assignedIssues = issues.filter(i => i.status === 'ASSIGNED');
+      const topHype = issues.reduce((max, i) => i.hypeCount > max ? i.hypeCount : max, 0);
+
+      document.getElementById('kpi-pending-count').textContent = pendingIssues.length;
+      document.getElementById('kpi-approved-count').textContent = assignedIssues.length;
+      document.getElementById('kpi-top-hype').textContent = topHype;
+
+      document.getElementById('tab-counter-pending').textContent = pendingIssues.length;
+      document.getElementById('tab-counter-assigned').textContent = assignedIssues.length;
+
+      // 2. Render Table Rows for active tab
+      const tableBody = document.getElementById('admin-table-body');
+      let filtered = issues.filter(i => i.status === adminTab);
+      // Sort table by hype descending for quick prioritization
+      filtered.sort((a, b) => b.hypeCount - a.hypeCount);
+
+      if (filtered.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="6">
+              <div class="empty-state">
+                <div class="empty-icon">${adminTab === 'PENDING' ? '🎉' : '📂'}</div>
+                <p>${adminTab === 'PENDING' ? 'All caught up! No pending issues require review.' : 'No issues currently assigned.'}</p>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tableBody.innerHTML = filtered.map(issue => `
+        <tr id="admin-row-${issue.id}">
+          <td>
+            <div style="font-weight: 600; color: #fff;">${escapeHtml(issue.title)}</div>
+            <div style="font-size: 0.72rem; color: var(--text-subtle);">${issue.createdAgo}</div>
+          </td>
+          <td>
+            <span class="category-chip ${getCategoryClass(issue.category)}">${formatCategoryName(issue.category)}</span>
+          </td>
+          <td>
+            <span style="color: #93c5fd;">📍 ${escapeHtml(issue.location)}</span>
+          </td>
+          <td>
+            <span class="hype-score-pill">🔥 ${issue.hypeCount}</span>
+          </td>
+          <td>
+            <span class="status-badge status-${issue.status}">${issue.status}</span>
+          </td>
+          <td style="text-align: right;">
+            <div class="action-group" style="justify-content: flex-end;">
+              ${issue.status === 'PENDING' ? `
+                <button class="btn-action-approve" onclick="adminApprove(${issue.id})">
+                  <span>✓</span> Approve
+                </button>
+                <button class="btn-action-reject" onclick="adminReject(${issue.id})">
+                  ✕ Reject
+                </button>
+              ` : `
+                <span style="font-size: 0.75rem; color: #38bdf8; font-weight: 600;">✓ In Pipeline</span>
+              `}
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // =========================================================================
+    // USER ACTIONS & MVP WORKFLOW LOGIC
+    // =========================================================================
+
+    // 1. Student Hype Toggle
+    function toggleHype(issueId) {
+      const issue = issues.find(i => i.id === issueId);
+      if (!issue) return;
+
+      if (issue.hypedByMe) {
+        issue.hypeCount--;
+        issue.hypedByMe = false;
+        showToast('🔥 Hype removed', 'info');
+      } else {
+        issue.hypeCount++;
+        issue.hypedByMe = true;
+        showToast('🔥 Hyped anonymously! Admins notified.', 'flame');
+      }
+
+      // Re-render both views in sync
+      renderStudentFeed();
+      renderAdminDashboard();
+    }
+
+    // 2. Student Anonymous Problem Submission
+    function handleStudentSubmit(e) {
+      e.preventDefault();
+      const title = document.getElementById('prob-title').value.trim();
+      const category = document.getElementById('prob-cat').value;
+      const location = document.getElementById('prob-loc').value.trim();
+      const description = document.getElementById('prob-desc').value.trim();
+
+      if (!title || !location || !description) return;
+
+      const newIssue = {
+        id: Date.now(),
+        title: title,
+        category: category,
+        location: location,
+        description: description,
+        hypeCount: 1, // Author automatic upvote
+        hypedByMe: true,
+        status: "PENDING",
+        createdAgo: "Just now",
+        timestamp: Date.now()
+      };
+
+      issues.unshift(newIssue);
+      closeReportDrawer();
+      document.getElementById('report-form').reset();
+
+      showToast('🛡️ Issue anonymously published to student feed & admin queue!', 'success');
+
+      renderStudentFeed();
+      renderAdminDashboard();
+    }
+
+    // 3. Admin 1-Click Quick Approve Action
+    function adminApprove(issueId) {
+      const issue = issues.find(i => i.id === issueId);
+      if (!issue) return;
+
+      issue.status = 'ASSIGNED'; // Updates from PENDING -> ASSIGNED
+      showToast(`✅ Approved: "${issue.title.substring(0, 24)}..." assigned to department!`, 'success');
+
+      renderStudentFeed();
+      renderAdminDashboard();
+    }
+
+    // 4. Admin Reject Action
+    function adminReject(issueId) {
+      const issue = issues.find(i => i.id === issueId);
+      if (!issue) return;
+
+      issue.status = 'REJECTED';
+      showToast(`✕ Ticket rejected.`, 'info');
+
+      renderStudentFeed();
+      renderAdminDashboard();
+    }
+
+    // =========================================================================
+    // UI CONTROLS & HELPERS
+    // =========================================================================
+
+    function setViewMode(mode) {
+      const workspace = document.getElementById('workspace');
+      const studentWin = document.getElementById('win-student');
+      const adminWin = document.getElementById('win-admin');
+
+      document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById(`btn-view-${mode}`).classList.add('active');
+
+      workspace.className = `workspace-area mode-${mode}`;
+
+      if (mode === 'student') {
+        studentWin.style.display = 'flex';
+        adminWin.style.display = 'none';
+      } else if (mode === 'admin') {
+        studentWin.style.display = 'none';
+        adminWin.style.display = 'flex';
+      } else {
+        studentWin.style.display = 'flex';
+        adminWin.style.display = 'flex';
+      }
+    }
+
+    function setStudentSort(sort) {
+      studentSort = sort;
+      document.getElementById('sort-hype-btn').classList.toggle('active', sort === 'hype');
+      document.getElementById('sort-recent-btn').classList.toggle('active', sort === 'recent');
+      renderStudentFeed();
+    }
+
+    function setAdminTab(tab) {
+      adminTab = tab;
+      document.getElementById('tab-btn-pending').classList.toggle('active', tab === 'PENDING');
+      document.getElementById('tab-btn-assigned').classList.toggle('active', tab === 'ASSIGNED');
+      renderAdminDashboard();
+    }
+
+    function openReportDrawer() {
+      document.getElementById('report-drawer-backdrop').classList.add('open');
+    }
+
+    function closeReportDrawer() {
+      document.getElementById('report-drawer-backdrop').classList.remove('open');
+    }
+
+    function closeDrawerOnOutside(e) {
+      if (e.target.id === 'report-drawer-backdrop') {
+        closeReportDrawer();
+      }
+    }
+
+    function showToast(msg, type) {
+      const toast = document.getElementById('toast');
+      const msgElem = document.getElementById('toast-msg');
+      const iconElem = document.getElementById('toast-icon');
+
+      msgElem.textContent = msg;
+      iconElem.textContent = type === 'flame' ? '🔥' : (type === 'success' ? '🛡️' : 'ℹ️');
+
+      toast.style.display = 'flex';
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => {
+        toast.style.display = 'none';
+      }, 3500);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return str.replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+    }
+
+    // Initialize UI
+    renderStudentFeed();
+    renderAdminDashboard();
+  </script>
+</body>
+</html>
