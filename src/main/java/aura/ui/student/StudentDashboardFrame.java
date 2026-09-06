@@ -70,10 +70,10 @@ public class StudentDashboardFrame extends JFrame {
     }
 
     private void loadSampleData() {
-        // Sample placeholder submissions (in-memory) so the UI is usable now
-        Submission s1 = new Submission(); s1.setSubmissionId(101); s1.setTitle("Broken Lamp in Lab"); s1.setStatus("PENDING"); s1.setHypeCount(5);
-        Submission s2 = new Submission(); s2.setSubmissionId(102); s2.setTitle("WiFi Issues in Block B"); s2.setStatus("IN_PROGRESS"); s2.setHypeCount(12);
-        submissions.add(s1); submissions.add(s2);
+        // Load from the SubmissionService (in-memory service for now)
+        aura.service.SubmissionService svc = aura.service.ServiceRegistry.getSubmissionService();
+        submissions.clear();
+        submissions.addAll(svc.listAllSubmissions());
         refreshTable();
     }
 
@@ -87,11 +87,11 @@ public class StudentDashboardFrame extends JFrame {
     private void openSubmissionDialog() {
         JDialog dlg = new JDialog(this, "New Submission", true);
         SubmissionFormPanel panel = new SubmissionFormPanel((Submission sub) -> {
-            // assign a synthetic ID and add to in-memory list
-            int nextId = submissions.stream().mapToInt(Submission::getSubmissionId).max().orElse(100) + 1;
-            sub.setSubmissionId(nextId);
-            sub.setStatus("PENDING");
-            submissions.add(sub);
+            aura.service.SubmissionService svc = aura.service.ServiceRegistry.getSubmissionService();
+            Submission created = svc.createSubmission(sub, user != null ? user.getUserId() : -1);
+            // reload list from service and refresh table
+            submissions.clear();
+            submissions.addAll(svc.listAllSubmissions());
             refreshTable();
             dlg.dispose();
         });
