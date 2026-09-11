@@ -1,7 +1,12 @@
 package aura.ui.student;
 
 import aura.model.Submission;
+import aura.model.ResolutionNote;
+import aura.model.SubmissionHistory;
 import aura.model.User;
+import aura.service.AuthService;
+import aura.service.HypeService;
+import aura.service.ServiceRegistry;
 import aura.ui.LoginFrame;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -22,11 +27,15 @@ public class StudentDashboardFrame extends JFrame {
     private User user;
     private DefaultTableModel tableModel;
     private List<Submission> submissions = new ArrayList<>();
+    private final HypeService hypeService = new HypeService();
 
     public StudentDashboardFrame(User user) {
+        if (user == null || new AuthService().isCurrentUserAdmin() || !new AuthService().isCurrentUser(user)) {
+            throw new SecurityException("An authenticated student session is required.");
+        }
         this.user = user;
         initUI();
-        loadSampleData();
+        loadSubmissions();
     }
 
     private void initUI() {
@@ -57,24 +66,42 @@ public class StudentDashboardFrame extends JFrame {
         // Bottom controls: New Submission button
         JPanel bottom = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton newSubmission = new JButton("New Submission");
+        JButton refresh = new JButton("Refresh");
+        JButton hype = new JButton("Hype Selected");
+        JButton viewDetails = new JButton("View Details");
         bottom.add(newSubmission);
+        bottom.add(refresh);
+        bottom.add(hype);
+        bottom.add(viewDetails);
         add(bottom, BorderLayout.SOUTH);
 
         // Actions
         logoutBtn.addActionListener((ActionEvent e) -> {
+            new AuthService().logout();
             dispose();
             SwingUtilities.invokeLater(() -> new LoginFrame().setVisible(true));
         });
 
         newSubmission.addActionListener((ActionEvent e) -> openSubmissionDialog());
+        refresh.addActionListener((ActionEvent e) -> loadSubmissions());
+        hype.addActionListener((ActionEvent e) -> {
+            int row = table.getSelectedRow();
+            if (row < 0) { JOptionPane.showMessageDialog(this, "Select a submission first.", "Information", JOptionPane.INFORMATION_MESSAGE); return; }
+            try { hypeService.addHype((int) tableModel.getValueAt(row, 0), user.getUserId()); loadSubmissions(); JOptionPane.showMessageDialog(this, "Hype added.", "Success", JOptionPane.INFORMATION_MESSAGE); }
+            catch (RuntimeException exception) { showError(exception); }
+        });
+        viewDetails.addActionListener((ActionEvent e) -> {
+            int row = table.getSelectedRow();
+            if (row < 0) { JOptionPane.showMessageDialog(this, "Select a submission first.", "Information", JOptionPane.INFORMATION_MESSAGE); return; }
+            showDetails((int) tableModel.getValueAt(row, 0));
+        });
     }
 
-    private void loadSampleData() {
-        // Load from the SubmissionService (in-memory service for now)
-        aura.service.SubmissionService svc = aura.service.ServiceRegistry.getSubmissionService();
+    private void loadSubmissions() {
+        aura.service.SubmissionService svc = ServiceRegistry.getSubmissionService();
         submissions.clear();
-        submissions.addAll(svc.listAllSubmissions());
-        refreshTable();
+        try { submissions.addAll(svc.listSubmissionsByStudent(user.getUserId())); refreshTable(); }
+        catch (RuntimeException exception) { showError(exception); }
     }
 
     private void refreshTable() {
@@ -88,16 +115,22 @@ public class StudentDashboardFrame extends JFrame {
         JDialog dlg = new JDialog(this, "New Submission", true);
         SubmissionFormPanel panel = new SubmissionFormPanel((Submission sub) -> {
             aura.service.SubmissionService svc = aura.service.ServiceRegistry.getSubmissionService();
-            Submission created = svc.createSubmission(sub, user != null ? user.getUserId() : -1);
-            // reload list from service and refresh table
-            submissions.clear();
-            submissions.addAll(svc.listAllSubmissions());
-            refreshTable();
-            dlg.dispose();
+            try { svc.createSubmission(sub, user.getUserId()); loadSubmissions(); dlg.dispose(); JOptionPane.showMessageDialog(this, "Submission created.", "Success", JOptionPane.INFORMATION_MESSAGE); }
+            catch (RuntimeException exception) { showError(exception); }
         });
         dlg.getContentPane().add(panel);
         dlg.pack();
         dlg.setLocationRelativeTo(this);
         dlg.setVisible(true);
+    }
+
+    private void showError(RuntimeException exception) { JOptionPane.showMessageDialog(this, exception.getMessage(), "AURA error", JOptionPane.ERROR_MESSAGE); }
+
+    private void showDetails(int submissionId) {
+        aura.service.SubmissionService service = ServiceRegistry.getSubmissionService();
+        StringBuilder details = new StringBuilder();
+        for (SubmissionHistory item : service.getHistory(submissionId)) details.append(item.getChangedAt()).append(" : ").append(item.getOldStatus()).append(" -> ").append(item.getNewStatus()).append("\n");
+        for (ResolutionNote note : service.findNotesBySubmission(submissionId)) details.append(note.getCreatedAt()).append(" : ").append(note.getNote()).append("\n");
+        JOptionPane.showMessageDialog(this, details.length() == 0 ? "No resolution updates yet." : details.toString(), "Submission updates", JOptionPane.INFORMATION_MESSAGE);
     }
 }

@@ -68,11 +68,13 @@ cd AURA
 # Execute sql/schema.sql followed by sql/seed.sql
 
 # 3. Configure Database Credentials
-cp src/main/resources/db.properties.example src/main/resources/db.properties
-# Edit db.properties with your Supabase JDBC connection string and password
+Copy-Item src/main/resources/db.properties.example src/main/resources/db.properties
+# Edit db.properties with the Supabase pooler URL, user, and database password.
+# Keep db.properties local; it is intentionally git-ignored.
+# Alternatively set AURA_URL, AURA_USER, and AURA_PASSWORD in the environment.
 
 # 4. Run Automated Unit & Regression Tests
-mvn test
+mvn clean test
 
 # 5. Launch the Modern FlatLaf Desktop Application
 mvn exec:java

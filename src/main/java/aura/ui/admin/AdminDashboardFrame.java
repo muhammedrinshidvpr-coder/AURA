@@ -5,6 +5,10 @@ import aura.model.ResolutionNote;
 import aura.model.SubmissionHistory;
 import aura.service.ServiceRegistry;
 import aura.service.SubmissionService;
+import aura.service.AuthService;
+import aura.model.User;
+import aura.util.SessionContext;
+import aura.ui.LoginFrame;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -19,8 +23,13 @@ public class AdminDashboardFrame extends JFrame {
 
     private DefaultTableModel tableModel;
     private SubmissionService svc;
+    private final User admin;
 
     public AdminDashboardFrame() {
+        if (!new AuthService().isCurrentUserAdmin()) {
+            throw new SecurityException("An authenticated administrator session is required.");
+        }
+        admin = SessionContext.getCurrentUser();
         svc = ServiceRegistry.getSubmissionService();
         initUI();
         loadData();
@@ -47,10 +56,16 @@ public class AdminDashboardFrame extends JFrame {
         JButton changeStatus = new JButton("Change Status");
         JButton addNote = new JButton("Add Resolution Note");
         JButton viewHistory = new JButton("View History");
-        controls.add(refresh); controls.add(changeStatus); controls.add(addNote); controls.add(viewHistory);
+        JButton logout = new JButton("Logout");
+        controls.add(refresh); controls.add(changeStatus); controls.add(addNote); controls.add(viewHistory); controls.add(logout);
         add(controls, BorderLayout.SOUTH);
 
         refresh.addActionListener((ActionEvent e) -> loadData());
+        logout.addActionListener((ActionEvent e) -> {
+            new AuthService().logout();
+            dispose();
+            new LoginFrame().setVisible(true);
+        });
 
         changeStatus.addActionListener((ActionEvent e) -> {
             int row = table.getSelectedRow();
@@ -62,9 +77,8 @@ public class AdminDashboardFrame extends JFrame {
             String[] options = new String[]{"PENDING","ASSIGNED","IN_PROGRESS","RESOLVED","REJECTED"};
             String newStatus = (String) JOptionPane.showInputDialog(this, "Select new status:", "Change Status", JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
             if (newStatus != null) {
-                // for demo, adminId is 1
-                svc.updateStatus(id, newStatus, 1);
-                loadData();
+                try { svc.updateStatus(id, newStatus, admin.getUserId()); loadData(); JOptionPane.showMessageDialog(this, "Status updated.", "Success", JOptionPane.INFORMATION_MESSAGE); }
+                catch (RuntimeException exception) { showError(exception); }
             }
         });
 
@@ -77,8 +91,8 @@ public class AdminDashboardFrame extends JFrame {
             int id = (int) tableModel.getValueAt(row, 0);
             String note = JOptionPane.showInputDialog(this, "Enter resolution note:");
             if (note != null && !note.trim().isEmpty()) {
-                svc.addResolutionNote(id, 1, note.trim());
-                JOptionPane.showMessageDialog(this, "Note added.", "Success", JOptionPane.INFORMATION_MESSAGE);
+                try { svc.addResolutionNote(id, admin.getUserId(), note.trim()); JOptionPane.showMessageDialog(this, "Note added.", "Success", JOptionPane.INFORMATION_MESSAGE); }
+                catch (RuntimeException exception) { showError(exception); }
             }
         });
 
@@ -91,15 +105,18 @@ public class AdminDashboardFrame extends JFrame {
             for (SubmissionHistory h : hist) {
                 sb.append(h.getChangedAt()).append(" : ").append(h.getOldStatus()).append(" -> ").append(h.getNewStatus()).append(" by ").append(h.getChangedBy()).append("\n");
             }
+            for (ResolutionNote note : svc.findNotesBySubmission(id)) {
+                sb.append(note.getCreatedAt()).append(" : note: ").append(note.getNote()).append("\n");
+            }
             JOptionPane.showMessageDialog(this, sb.length()==0?"No history":sb.toString(), "History", JOptionPane.INFORMATION_MESSAGE);
         });
     }
 
     private void loadData() {
         tableModel.setRowCount(0);
-        List<Submission> list = svc.listAllSubmissions();
-        for (Submission s : list) {
-            tableModel.addRow(new Object[]{s.getSubmissionId(), s.getTitle(), s.getStatus(), s.getHypeCount()});
-        }
+        try { for (Submission s : svc.listAllSubmissions()) tableModel.addRow(new Object[]{s.getSubmissionId(), s.getTitle(), s.getStatus(), s.getHypeCount()}); }
+        catch (RuntimeException exception) { showError(exception); }
     }
+
+    private void showError(RuntimeException exception) { JOptionPane.showMessageDialog(this, exception.getMessage(), "AURA error", JOptionPane.ERROR_MESSAGE); }
 }

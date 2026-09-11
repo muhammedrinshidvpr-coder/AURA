@@ -1,87 +1,138 @@
 package aura.ui;
 
+import aura.config.OAuthConfig;
 import aura.model.User;
 import aura.service.AuthService;
 import aura.ui.admin.AdminDashboardFrame;
 import aura.ui.student.StudentDashboardFrame;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 
-/**
- * LoginFrame — simple login UI implemented to validate the app shell.
- */
+/** Login screen for password, Google OAuth, and offline development sign-in. */
 public class LoginFrame extends JFrame {
-n    private JTextField emailField;
-    private JPasswordField passwordField;
-    private JLabel statusLabel;
-    private AuthService authService;
-    public LoginFrame() {
-        authService = new AuthService();
-        initUI();
+    private final JTextField emailField = new JTextField(20);
+    private final JPasswordField passwordField = new JPasswordField(20);
+    private final JLabel statusLabel = new JLabel(" ", SwingConstants.CENTER);
+    private final AuthService authService;
+
+    public LoginFrame() {
+        this(new AuthService());
     }
 
-    private void initUI() {
-        setTitle("AURA - Login");
-        setSize(420, 260);
+    public LoginFrame(AuthService authService) {
+        this.authService = authService;
+        initializeUi();
+    }
+
+    private void initializeUi() {
+        setTitle("AURA - Sign In");
+        setSize(460, OAuthConfig.isDevMode() ? 340 : 300);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         JPanel panel = new JPanel(new GridBagLayout());
-        GridBagConstraints c = new GridBagConstraints();
-        c.insets = new Insets(6, 6, 6, 6);
-        c.fill = GridBagConstraints.HORIZONTAL;
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.insets = new Insets(6, 6, 6, 6);
+        constraints.fill = GridBagConstraints.HORIZONTAL;
 
-        c.gridx = 0; c.gridy = 0; panel.add(new JLabel("Email:"), c);
-        c.gridx = 1; c.gridy = 0; emailField = new JTextField(20); panel.add(emailField, c);
+        constraints.gridx = 0;
+        constraints.gridy = 0;
+        panel.add(new JLabel("Institutional email:"), constraints);
+        constraints.gridx = 1;
+        panel.add(emailField, constraints);
 
-        c.gridx = 0; c.gridy = 1; panel.add(new JLabel("Password:"), c);
-        c.gridx = 1; c.gridy = 1; passwordField = new JPasswordField(20); panel.add(passwordField, c);
+        constraints.gridx = 0;
+        constraints.gridy = 1;
+        panel.add(new JLabel("Password:"), constraints);
+        constraints.gridx = 1;
+        panel.add(passwordField, constraints);
 
-        c.gridx = 0; c.gridy = 2; c.gridwidth = 2; c.anchor = GridBagConstraints.CENTER;
-        JButton loginButton = new JButton("Login");
-        panel.add(loginButton, c);
-        c.gridx = 0; c.gridy = 3; c.gridwidth = 2; statusLabel = new JLabel(" ", SwingConstants.CENTER); panel.add(statusLabel, c);
-        add(panel);
-        loginButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                onLogin();
-            }
-        });
+        JButton passwordLogin = new JButton("Sign in with password");
+        constraints.gridx = 0;
+        constraints.gridy = 2;
+        constraints.gridwidth = 2;
+        panel.add(passwordLogin, constraints);
+
+        JButton googleLogin = new JButton("Sign in with Google");
+        googleLogin.setEnabled(OAuthConfig.isConfigured());
+        googleLogin.setToolTipText(googleLogin.isEnabled()
+                ? "Opens your default browser for institutional Google sign-in"
+                : "Configure oauth.properties to enable Google sign-in");
+        constraints.gridy = 3;
+        panel.add(googleLogin, constraints);
+
+        if (OAuthConfig.isDevMode()) {
+            JPanel mockPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 6, 0));
+            JButton mockStudent = new JButton("Mock Student");
+            JButton mockAdmin = new JButton("Mock Admin");
+            mockPanel.add(mockStudent);
+            mockPanel.add(mockAdmin);
+            constraints.gridy = 4;
+            panel.add(mockPanel, constraints);
+            mockStudent.addActionListener(event -> openDashboard(authService.loginMock("STUDENT")));
+            mockAdmin.addActionListener(event -> openDashboard(authService.loginMock("ADMIN")));
+        }
+
+        constraints.gridy = OAuthConfig.isDevMode() ? 5 : 4;
+        panel.add(statusLabel, constraints);
+        add(panel, BorderLayout.CENTER);
+
+        passwordLogin.addActionListener(event -> passwordLogin());
+        googleLogin.addActionListener(event -> googleLogin());
+        getRootPane().setDefaultButton(passwordLogin);
     }
 
-    private void onLogin() {
-        String email = emailField.getText().trim();
+    private void passwordLogin() {
         String password = new String(passwordField.getPassword());
-        statusLabel.setText("");
-        if (!authService.validateCredentials(email, password)) {
-            statusLabel.setText("Invalid email or password format.");
-            return;
-        }
-        User user = authService.authenticate(email, password);
+        User user = authService.authenticate(emailField.getText(), password);
+        passwordField.setText("");
         if (user == null) {
-            statusLabel.setText("Authentication failed. Check credentials.");
+            statusLabel.setText("Sign-in failed. Use a valid TKMCE account and password.");
             return;
         }
-        SwingUtilities.invokeLater(() -> {
-            dispose();
-            if ("ADMIN".equalsIgnoreCase(user.getRole())) {
-                AdminDashboardFrame admin = new AdminDashboardFrame();
-                admin.setVisible(true);
-            } else {
-                StudentDashboardFrame student = new StudentDashboardFrame(user);
-                student.setVisible(true);
-            }
-        });
+        openDashboard(user);
     }
 
-    public static void main(String[] args) {
+    private void googleLogin() {
+        statusLabel.setText("Waiting for Google sign-in in your browser...");
+        new SwingWorker<User, Void>() {
+            @Override
+            protected User doInBackground() throws Exception {
+                return authService.loginWithGoogle();
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    openDashboard(get());
+                } catch (Exception exception) {
+                    statusLabel.setText("Google sign-in failed: " + exception.getMessage());
+                }
+            }
+        }.execute();
+    }
+
+    private void openDashboard(User user) {
+        dispose();
         SwingUtilities.invokeLater(() -> {
-            LoginFrame lf = new LoginFrame();
-            lf.setVisible(true);
+            if ("ADMIN".equalsIgnoreCase(user.getRole())) {
+                new AdminDashboardFrame().setVisible(true);
+            } else {
+                new StudentDashboardFrame(user).setVisible(true);
+            }
         });
     }
 }

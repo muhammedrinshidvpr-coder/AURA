@@ -1,5 +1,8 @@
 package aura.service;
 
+import aura.dao.SubmissionHypeDAO;
+import java.sql.SQLException;
+
 /**
  * HypeService — manages trending/upvote logic.
  * Assigned to: Nirmal Binoy (B25CS052)
@@ -8,26 +11,27 @@ package aura.service;
  */
 public class HypeService {
 
-    public HypeService() {
+    private final SubmissionHypeDAO hypeDAO;
+
+    public HypeService() { this(new SubmissionHypeDAO()); }
+
+    public HypeService(SubmissionHypeDAO hypeDAO) {
+        this.hypeDAO = hypeDAO;
     }
 
     public void addHype(int submissionId, int studentId) {
-        // TODO: enforce single-vote-per-student, update aggregated counts
-        throw new UnsupportedOperationException("addHype() not implemented yet");
+        try { hypeDAO.addHype(submissionId, studentId); } catch (SQLException exception) { throw new IllegalStateException("Unable to save hype.", exception); }
     }
 
     public void removeHype(int submissionId, int studentId) {
-        // TODO: remove a student's hype
-        throw new UnsupportedOperationException("removeHype() not implemented yet");
+        try { hypeDAO.removeHype(submissionId, studentId); } catch (SQLException exception) { throw new IllegalStateException("Unable to remove hype.", exception); }
     }
 
     public int getHypeCount(int submissionId) {
-        // TODO: return aggregated count from SubmissionHypeDAO
-        throw new UnsupportedOperationException("getHypeCount() not implemented yet");
+        try { return hypeDAO.countHypes(submissionId); } catch (SQLException exception) { throw new IllegalStateException("Unable to load hype count.", exception); }
     }
 
     public boolean hasStudentHyped(int submissionId, int studentId) {
-        // TODO: check DAO
-        throw new UnsupportedOperationException("hasStudentHyped() not implemented yet");
+        try { return hypeDAO.hasStudentHyped(submissionId, studentId); } catch (SQLException exception) { throw new IllegalStateException("Unable to load hype state.", exception); }
     }
 }
