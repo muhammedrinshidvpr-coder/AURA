@@ -51,6 +51,9 @@ public class SubmissionAndHypeServiceTest {
     @Test
     @DisplayName("AuthService successfully authenticates valid TKMCE credentials")
     void testAuthServiceSuccess() {
+        org.junit.jupiter.api.Assumptions.assumeTrue(aura.config.DatabaseConfig.isConfigured(),
+                "Skipping live DB integration test: Supabase credentials not configured in this environment");
+
         User user = authService.authenticate("student1@tkmce.ac.in", "password123");
         assertNotNull(user);
         assertEquals("Muhammed Rinshid VP", user.getName());
@@ -70,6 +73,9 @@ public class SubmissionAndHypeServiceTest {
     @Test
     @DisplayName("Submission creation registers private receipt in Anonymity Vault")
     void testSubmissionCreationAndVaultReceipt() {
+        org.junit.jupiter.api.Assumptions.assumeTrue(aura.config.DatabaseConfig.isConfigured(),
+                "Skipping live DB integration test: Supabase credentials not configured in this environment");
+
         int studentId = 1;
         Submission newSub = new Submission(0, "Broken Switchboard in Seminar Hall",
                 "Two main sockets are non-functional causing projector disconnections.",
@@ -92,6 +98,9 @@ public class SubmissionAndHypeServiceTest {
     @Test
     @DisplayName("Hype upvoting enforces one vote per student with toggle behavior")
     void testHypeToggling() {
+        org.junit.jupiter.api.Assumptions.assumeTrue(aura.config.DatabaseConfig.isConfigured(),
+                "Skipping live DB integration test: Supabase credentials not configured in this environment");
+
         int subId = 85;
         int studentId = 3;
 
@@ -114,6 +123,9 @@ public class SubmissionAndHypeServiceTest {
     @Test
     @DisplayName("ReportService generates RFC-4180 compliant CSV")
     void testReportServiceCsvGeneration() {
+        org.junit.jupiter.api.Assumptions.assumeTrue(aura.config.DatabaseConfig.isConfigured(),
+                "Skipping live DB integration test: Supabase credentials not configured in this environment");
+
         String csv = reportService.generateCsvReport();
         assertNotNull(csv);
         assertTrue(csv.contains("Submission ID,Title,Type,Category,Location,Priority,Status,Hype Count,Created At"));

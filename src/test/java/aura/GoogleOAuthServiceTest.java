@@ -50,6 +50,9 @@ public class GoogleOAuthServiceTest {
     @Test
     @DisplayName("Google OAuth preserves pre-seeded ADMIN privileges for institutional administrators")
     void testExistingAdminRetainsAdminRole() {
+        org.junit.jupiter.api.Assumptions.assumeTrue(aura.config.DatabaseConfig.isConfigured(),
+                "Skipping live DB integration test: Supabase credentials not configured in this environment");
+
         GoogleOAuthService.GoogleUserInfo adminInfo =
                 new GoogleOAuthService.GoogleUserInfo("admin@tkmce.ac.in", "Campus Maintenance Admin", null);
 
@@ -63,6 +66,9 @@ public class GoogleOAuthServiceTest {
     @Test
     @DisplayName("Google OAuth auto-provisions newly authenticated students with Role.STUDENT (Least Privilege)")
     void testAutoProvisioningNewStudent() {
+        org.junit.jupiter.api.Assumptions.assumeTrue(aura.config.DatabaseConfig.isConfigured(),
+                "Skipping live DB integration test: Supabase credentials not configured in this environment");
+
         String uniqueStudentEmail = "auto.student." + System.currentTimeMillis() + "@tkmce.ac.in";
         String studentName = "Test Auto-Provisioned Student";
 

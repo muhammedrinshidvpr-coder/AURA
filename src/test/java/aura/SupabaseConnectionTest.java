@@ -18,6 +18,9 @@ public class SupabaseConnectionTest {
     @Test
     @DisplayName("Verify live Supabase PostgreSQL database connectivity and tables")
     public void testSupabaseConnection() throws Exception {
+        org.junit.jupiter.api.Assumptions.assumeTrue(DatabaseConfig.isConfigured(),
+                "Skipping live DB integration test: Supabase credentials not configured in this environment");
+
         try (Connection conn = DatabaseConfig.getConnection()) {
             assertNotNull(conn, "Connection should not be null");
             System.out.println("SUCCESSFULLY CONNECTED TO SUPABASE POSTGRESQL!");

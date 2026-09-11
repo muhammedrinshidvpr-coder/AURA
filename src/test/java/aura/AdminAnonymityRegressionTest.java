@@ -41,6 +41,9 @@ public class AdminAnonymityRegressionTest {
     @Test
     @DisplayName("Administrative triage queue receives zero student identity information")
     void testAdminTriageDoesNotExposeStudentIdentity() {
+        org.junit.jupiter.api.Assumptions.assumeTrue(aura.config.DatabaseConfig.isConfigured(),
+                "Skipping live DB integration test: Supabase credentials not configured in this environment");
+
         SubmissionService submissionService = new SubmissionService();
         List<Submission> triageQueue = submissionService.getAllSubmissions();
 
@@ -57,6 +60,9 @@ public class AdminAnonymityRegressionTest {
     @Test
     @DisplayName("TrackingService status update preserves anonymity while recording audit trail")
     void testTrackingServicePreservesAnonymity() {
+        org.junit.jupiter.api.Assumptions.assumeTrue(aura.config.DatabaseConfig.isConfigured(),
+                "Skipping live DB integration test: Supabase credentials not configured in this environment");
+
         TrackingService trackingService = new TrackingService();
         int ticketId = 104;
 

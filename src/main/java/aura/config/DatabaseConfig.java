@@ -61,6 +61,13 @@ public final class DatabaseConfig {
     }
 
     /**
+     * Checks whether valid database credentials are configured (i.e. not the unreplaced example template).
+     */
+    public static boolean isConfigured() {
+        return URL != null && !URL.isBlank() && !URL.contains("[YOUR_PROJECT_REF]") && !USER.isBlank();
+    }
+
+    /**
      * Obtains a new live JDBC Connection to Supabase PostgreSQL with retry resilience.
      * Callers MUST close the connection using try-with-resources.
      */

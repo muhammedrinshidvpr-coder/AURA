@@ -10,7 +10,7 @@ on:
 jobs:
   # ===========================================================================
   # 1. JAVA ENTERPRISE BACKEND & DESKTOP CI
-  # Compiles Java 17 source, runs JUnit 5 tests, packages executable fat JAR,
+  # Compiles Java 17 source, executes automated tests, packages executable fat JAR,
   # and archives the standalone desktop artifact for team distribution.
   # ===========================================================================
   build-and-test-java:
@@ -50,14 +50,7 @@ jobs:
 
       - name: Compile and Run Automated Tests
         shell: bash
-        run: |
-          # If real database secret is present, run full test suite including Supabase tests
-          # Otherwise run offline tests and package the artifact
-          if [ -n "${{ secrets.SUPABASE_DB_URL }}" ]; then
-            mvn -B clean verify
-          else
-            mvn -B clean package -Dtest="GoogleOAuthServiceTest"
-          fi
+        run: mvn -B clean test
 
       - name: Package Executable Standalone Fat JAR
         shell: bash
@@ -87,26 +80,11 @@ jobs:
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
-      - name: Pull Vercel Environment Information
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: team_lsQBunCOAUIAvYzc9H8uioq6
-          VERCEL_PROJECT_ID: prj_NlRpX9xTiEKHP8CWSt9vMcJmj2YY
-        run: |
-          if [ -n "$VERCEL_TOKEN" ]; then
-            vercel pull --yes --environment=production --token=$VERCEL_TOKEN
-          else
-            echo "VERCEL_TOKEN secret not configured; skipping automatic deployment pull."
-          fi
-
       - name: Deploy to Vercel Production
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: team_lsQBunCOAUIAvYzc9H8uioq6
           VERCEL_PROJECT_ID: prj_NlRpX9xTiEKHP8CWSt9vMcJmj2YY
         run: |
-          if [ -n "$VERCEL_TOKEN" ]; then
-            vercel deploy --prod --yes --token=$VERCEL_TOKEN
-          else
-            echo "NOTE: To enable automatic Vercel CD on push, add your VERCEL_TOKEN to GitHub repository secrets."
-          fi
+          echo "Deploying to Vercel production with project scope..."
+          vercel deploy --prod --yes --token=$VERCEL_TOKEN
