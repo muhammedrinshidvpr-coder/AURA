@@ -33,6 +33,7 @@ Every component of AURA is rigorously documented and directly aligned with the f
 | [`docs/SECURITY.md`](docs/SECURITY.md) | Domain gating (`@tkmce.ac.in`), BCrypt hashing, and Anonymity Vault mathematical proof | Slides 9, 10, 16 |
 | [`docs/TESTING.md`](docs/TESTING.md) | Automated JUnit 5 test suites and administrative anonymity regression verification | Slides 15, 28 |
 | [`docs/ROADMAP.md`](docs/ROADMAP.md) | 10-Week schedule (Slide 28) with Planned vs. Completed verification matrix | Slide 18, 28 |
+| [`docs/VIVA_DEFENSE_GUIDE.md`](docs/VIVA_DEFENSE_GUIDE.md) | **Phase 2 Viva Voce Defense Guide** (Slide-by-slide Q&A for all 5 team members & Golden Path script) | Slides 1–30 |
 
 ---
 
