@@ -3,10 +3,13 @@ target/
 *.class
 *.jar
 
-# Local DB credentials — never commit real secrets.
-# A db.properties.example template is committed instead.
+# Local DB & OAuth credentials — never commit real secrets.
+# Template .example files are committed instead.
 src/main/resources/db.properties
 src/test/resources/db.properties
+src/main/resources/oauth.properties
+src/test/resources/oauth.properties
+
 
 # Portable local build tools (downloaded, not part of the project)
 .tools/
