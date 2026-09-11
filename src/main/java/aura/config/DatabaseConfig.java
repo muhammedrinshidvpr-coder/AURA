@@ -25,19 +25,29 @@ public final class DatabaseConfig {
 
         Properties props = new Properties();
         try (InputStream in = DatabaseConfig.class.getResourceAsStream("/db.properties")) {
-            if (in == null) {
-                throw new IllegalStateException(
-                    "db.properties not found on the classpath. Ensure src/main/resources/db.properties exists.");
+            if (in != null) {
+                props.load(in);
+            } else {
+                try (InputStream exIn = DatabaseConfig.class.getResourceAsStream("/db.properties.example")) {
+                    if (exIn != null) {
+                        props.load(exIn);
+                    }
+                }
             }
-            props.load(in);
-        } catch (IOException e) {
-            throw new ExceptionInInitializerError("Failed to load db.properties: " + e.getMessage());
+        } catch (IOException ignored) {
+            // Handled via environment variable fallback below
         }
 
-        URL = props.getProperty("db.url");
-        USER = props.getProperty("db.user");
-        PASSWORD = props.getProperty("db.password");
-        DRIVER = props.getProperty("db.driver", "org.postgresql.Driver");
+        // Environment variables take precedence (standard for CI/CD and production containers)
+        String envUrl = System.getenv("DB_URL");
+        String envUser = System.getenv("DB_USER");
+        String envPassword = System.getenv("DB_PASSWORD");
+        String envDriver = System.getenv("DB_DRIVER");
+
+        URL = (envUrl != null && !envUrl.isBlank()) ? envUrl : props.getProperty("db.url", "");
+        USER = (envUser != null && !envUser.isBlank()) ? envUser : props.getProperty("db.user", "");
+        PASSWORD = (envPassword != null && !envPassword.isBlank()) ? envPassword : props.getProperty("db.password", "");
+        DRIVER = (envDriver != null && !envDriver.isBlank()) ? envDriver : props.getProperty("db.driver", "org.postgresql.Driver");
 
         try {
             Class.forName(DRIVER);

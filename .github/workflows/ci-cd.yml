@@ -1,0 +1,112 @@
+name: AURA CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  # ===========================================================================
+  # 1. JAVA ENTERPRISE BACKEND & DESKTOP CI
+  # Compiles Java 17 source, runs JUnit 5 tests, packages executable fat JAR,
+  # and archives the standalone desktop artifact for team distribution.
+  # ===========================================================================
+  build-and-test-java:
+    name: Java 17 CI & Standalone JAR Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17 (Eclipse Temurin)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Configure Database Credentials
+        shell: bash
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          DB_USER: ${{ secrets.SUPABASE_DB_USER }}
+          DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: |
+          if [ -n "$DB_URL" ] && [ -n "$DB_USER" ]; then
+            echo "Generating db.properties from GitHub Secrets..."
+            cat <<EOF > src/main/resources/db.properties
+          db.url=$DB_URL
+          db.user=$DB_USER
+          db.password=$DB_PASSWORD
+          db.driver=org.postgresql.Driver
+          EOF
+          else
+            echo "Using default fallback configuration from db.properties.example..."
+            cp src/main/resources/db.properties.example src/main/resources/db.properties
+          fi
+
+      - name: Compile and Run Automated Tests
+        shell: bash
+        run: |
+          # If real database secret is present, run full test suite including Supabase tests
+          # Otherwise run offline tests and package the artifact
+          if [ -n "${{ secrets.SUPABASE_DB_URL }}" ]; then
+            mvn -B clean verify
+          else
+            mvn -B clean package -Dtest="GoogleOAuthServiceTest"
+          fi
+
+      - name: Package Executable Standalone Fat JAR
+        shell: bash
+        run: mvn -B package -DskipTests=true
+
+      - name: Archive Executable JAR as Workflow Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AURA-Desktop-Application
+          path: target/aura.jar
+          retention-days: 30
+
+  # ===========================================================================
+  # 2. VERCEL WEB & MOBILE PORTAL CD
+  # Automatically deploys the responsive PWA web portal to Vercel on push to main
+  # ===========================================================================
+  deploy-web-portal:
+    name: Deploy Web Portal to Vercel
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    needs: [ build-and-test-java ]
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Information
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: team_lsQBunCOAUIAvYzc9H8uioq6
+          VERCEL_PROJECT_ID: prj_NlRpX9xTiEKHP8CWSt9vMcJmj2YY
+        run: |
+          if [ -n "$VERCEL_TOKEN" ]; then
+            vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+          else
+            echo "VERCEL_TOKEN secret not configured; skipping automatic deployment pull."
+          fi
+
+      - name: Deploy to Vercel Production
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: team_lsQBunCOAUIAvYzc9H8uioq6
+          VERCEL_PROJECT_ID: prj_NlRpX9xTiEKHP8CWSt9vMcJmj2YY
+        run: |
+          if [ -n "$VERCEL_TOKEN" ]; then
+            vercel deploy --prod --yes --token=$VERCEL_TOKEN
+          else
+            echo "NOTE: To enable automatic Vercel CD on push, add your VERCEL_TOKEN to GitHub repository secrets."
+          fi

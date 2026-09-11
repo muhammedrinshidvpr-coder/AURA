@@ -1,8 +1,15 @@
 # AURA — Autonomous University Response and Action
 
+[![CI/CD Pipeline](https://github.com/muhammedrinshidvpr-coder/AURA/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/muhammedrinshidvpr-coder/AURA/actions/workflows/ci-cd.yml)
+[![Live Web Portal](https://img.shields.io/badge/Vercel-aura--campus--three.vercel.app-6366f1?logo=vercel&logoColor=white)](https://aura-campus-three.vercel.app)
+[![Java 17](https://img.shields.io/badge/Java-17%20SE-ED8B00?logo=openjdk&logoColor=white)](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html)
+[![Database](https://img.shields.io/badge/Database-Supabase%20PostgreSQL-3ECF8E?logo=supabase&logoColor=white)](https://supabase.com)
+[![Course](https://img.shields.io/badge/KTU-CST205%20%2F%20CSL203-blue)](https://ktu.edu.in)
+
 > *"REPORT. TRACK. RESOLVE. IMPROVE."*  
 > **Department of Computer Science & Engineering, TKM College of Engineering (TKMCE)**  
-> Academic Course: APJ Abdul Kalam Technological University (KTU) CST205 / CSL203 — Advanced Programming Java Project
+> Academic Course: APJ Abdul Kalam Technological University (KTU) CST205 / CSL203 — Advanced Programming Java Project  
+> **Live Web & Mobile Portal:** [https://aura-campus-three.vercel.app](https://aura-campus-three.vercel.app)
 
 ---
 
