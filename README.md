@@ -50,11 +50,11 @@ All deliverables and modules map directly to the approved presentation assignmen
 
 | Member | University Reg No | Role | Presentation Slides | Module Ownership |
 |---|---|---|---|---|
-| **Muhammed Rinshid VP** | B25CS045 | **Team Lead** | Slides 1–4, 20 | System Coordination, Core Architecture, Supabase Integration, Presentation Lead |
-| **Nirmal Binoy** | B25CS052 | **Core Developer** | Slides 5–8 | Proposed Solution, UML Class Modeling, Hype/Trending Engine (`HypeService`) |
-| **Mohammed Nafih** | B25CS037 | **Core Developer** | Slides 9–12 | RBAC Security Pipeline, Anonymity Vault (`AuthService`, `StudentReceiptDAO`) |
-| **Rahandeep RD** | B25CS053 | **Database & GUI Engineer** | Slides 13–14, 18 | PostgreSQL Schema (`schema.sql`), FlatLaf Desktop UI (`aura.ui.student.*`, `SubmissionDAO`) |
-| **Athil Rahuman A** | B25CS084 | **Documentation & Process Lead** | Slides 15–17, 19 | Audit Lifecycle (`TrackingService`, `ReportService`), Progress Tracking, CSV Export |
+| **Muhammed Rinshid VP** | B25CSB45 | **Team Lead** | Slides 1–4, 20 | System Coordination, Core Architecture, Supabase Integration, Presentation Lead |
+| **Nirmal Binoy** | B25CSB52 | **Core Developer** | Slides 5–8 | Proposed Solution, UML Class Modeling, Hype/Trending Engine (`HypeService`) |
+| **Mohammed Nafih** | B25CSB37 | **Core Developer** | Slides 9–12 | RBAC Security Pipeline, Anonymity Vault (`AuthService`, `StudentReceiptDAO`) |
+| **Rahandeep RD** | B25CSB53 | **Database & GUI Engineer** | Slides 13–14, 18 | PostgreSQL Schema (`schema.sql`), FlatLaf Desktop UI (`aura.ui.student.*`, `SubmissionDAO`) |
+| **Athil Rahuman A** | B25CSB84 | **Documentation & Process Lead** | Slides 15–17, 19 | Audit Lifecycle (`TrackingService`, `ReportService`), Progress Tracking, CSV Export |
 
 ---
 

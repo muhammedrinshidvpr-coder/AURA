@@ -25,7 +25,7 @@ Every team member has dedicated module ownership derived from Slide 17 of [`docs
 
 ```
 ========================================================================================
-TEAM MEMBER 1: MUHAMMED RINSHID VP (B25CS045) — TEAM LEAD & SYSTEM COORDINATOR
+TEAM MEMBER 1: MUHAMMED RINSHID VP (B25CSB45) — TEAM LEAD & SYSTEM COORDINATOR
 Slides Owned: 1–4, 20 | Module: Core Architecture, DatabaseConfig, Google OAuth Bridge
 ========================================================================================
 ```
@@ -48,7 +48,7 @@ Slides Owned: 1–4, 20 | Module: Core Architecture, DatabaseConfig, Google OAut
 
 ```
 ========================================================================================
-TEAM MEMBER 2: NIRMAL BINOY (B25CS052) — CORE DEVELOPER (HYPE ENGINE & MODELING)
+TEAM MEMBER 2: NIRMAL BINOY (B25CSB52) — CORE DEVELOPER (HYPE ENGINE & MODELING)
 Slides Owned: 5–8 | Module: Proposed Solution, UML Class Modeling, HypeService, SubmissionHypeDAO
 ========================================================================================
 ```
@@ -70,7 +70,7 @@ Slides Owned: 5–8 | Module: Proposed Solution, UML Class Modeling, HypeService
 
 ```
 ========================================================================================
-TEAM MEMBER 3: MOHAMMED NAFIH (B25CS037) — SECURITY & ANONYMITY VAULT LEAD
+TEAM MEMBER 3: MOHAMMED NAFIH (B25CSB37) — SECURITY & ANONYMITY VAULT LEAD
 Slides Owned: 9–12 | Module: RBAC Pipeline, AuthService, StudentReceiptDAO, PasswordUtil
 ========================================================================================
 ```
@@ -91,7 +91,7 @@ Slides Owned: 9–12 | Module: RBAC Pipeline, AuthService, StudentReceiptDAO, Pa
 
 ```
 ========================================================================================
-TEAM MEMBER 4: RAHANDEEP RD (B25CS053) — DATABASE & GUI ENGINEER
+TEAM MEMBER 4: RAHANDEEP RD (B25CSB53) — DATABASE & GUI ENGINEER
 Slides Owned: 13–14, 18 | Module: PostgreSQL Schema, FlatLaf Modern GUI, SubmissionDAO
 ========================================================================================
 ```
@@ -112,7 +112,7 @@ Slides Owned: 13–14, 18 | Module: PostgreSQL Schema, FlatLaf Modern GUI, Submi
 
 ```
 ========================================================================================
-TEAM MEMBER 5: ATHIL RAHUMAN A (B25CS084) — DOCUMENTATION, TESTING & AUDIT LEAD
+TEAM MEMBER 5: ATHIL RAHUMAN A (B25CSB84) — DOCUMENTATION, TESTING & AUDIT LEAD
 Slides Owned: 15–17, 19 | Module: State Lifecycle, ReportService, JUnit 5 Test Suite, CSV Export
 ========================================================================================
 ```

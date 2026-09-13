@@ -31,5 +31,7 @@ Thumbs.db
 
 # Antigravity / Freebuff IDE
 .freebuff/
+.playwright-mcp/
+scratch/
 
 .vercel

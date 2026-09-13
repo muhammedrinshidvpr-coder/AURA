@@ -975,7 +975,7 @@ class ValidationUtilTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-            "b25cs045@tkmce.ac.in",
+            "b25csb45@tkmce.ac.in",
             "rinshid.vp@tkmce.ac.in",
             "hodcse@tkmce.ac.in",
             "student_2025@tkmce.ac.in"

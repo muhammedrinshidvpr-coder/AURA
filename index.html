@@ -7,15 +7,15 @@
   
   <!-- PWA & Mobile Web App Meta -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0b0f17">
+  <meta name="theme-color" content="#ffffff">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="AURA">
   
-  <!-- SEO & Social Meta -->
+  <!-- SEO & Academic Metadata -->
   <meta name="description" content="AURA: TKMCE Campus Issue & Suggestion Governance Platform with Decoupled Anonymity Vault and Crowd Hype Prioritization.">
 
-  <!-- Google Fonts -->
+  <!-- Google Fonts: Inter (UI) & JetBrains Mono (Codes / Counters) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -24,43 +24,60 @@
   <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 
   <style>
+    /* ==========================================================================
+       AURA DESIGN TOKENS — MODERN MINIMALIST WHITE THEME
+       Optimized for high legibility, clean spacing, and academic evaluation.
+       ========================================================================== */
     :root {
-      --bg-base: #090d16;
-      --bg-surface: #101623;
-      --bg-card: #172033;
-      --bg-card-hover: #1e2942;
-      --border-subtle: #1e293b;
-      --border-light: rgba(255, 255, 255, 0.08);
+      /* Background Canvas & Card Surfaces */
+      --bg-base: #f8fafc;            /* Clean Slate-50 canvas */
+      --bg-surface: #ffffff;         /* Pure white container & modals */
+      --bg-card: #ffffff;            /* Pure white card surface */
+      --bg-card-hover: #fbfcfe;      /* Subtle hover tint */
+      --bg-muted: #f1f5f9;           /* Slate-100 muted pill background */
       
-      --primary: #6366f1;
-      --primary-hover: #4f46e5;
-      --primary-glow: rgba(99, 102, 241, 0.28);
+      /* Borders & Dividers */
+      --border-subtle: #e2e8f0;      /* Slate-200 crisp border */
+      --border-light: #f1f5f9;       /* Slate-100 soft border */
+      --border-hover: #cbd5e1;       /* Slate-300 interactive hover */
       
-      --accent-flame: #f97316;
-      --accent-flame-glow: rgba(249, 115, 22, 0.28);
+      /* Primary Brand & Accents (Indigo & Warm Flame) */
+      --primary: #4f46e5;            /* Indigo 600 - crisp, executive */
+      --primary-hover: #4338ca;      /* Indigo 700 */
+      --primary-bg: #eef2ff;         /* Indigo 50 */
+      --primary-glow: rgba(79, 70, 229, 0.12);
       
-      --status-pending: #f59e0b;
-      --status-pending-bg: rgba(245, 158, 11, 0.12);
-      --status-assigned: #38bdf8;
-      --status-assigned-bg: rgba(56, 189, 248, 0.12);
-      --status-in-progress: #818cf8;
-      --status-in-progress-bg: rgba(129, 140, 248, 0.12);
-      --status-resolved: #10b981;
-      --status-resolved-bg: rgba(16, 185, 129, 0.12);
-      --status-rejected: #ef4444;
-      --status-rejected-bg: rgba(239, 68, 68, 0.12);
+      --accent-flame: #ea580c;       /* Orange 600 (Hype Engine) */
+      --accent-flame-bg: #fff7ed;    /* Orange 50 */
+      --accent-flame-border: #fed7aa;/* Orange 200 */
+      --accent-flame-glow: rgba(234, 88, 12, 0.15);
+      
+      /* 5-Stage Lifecycle Status Badges (High Contrast Light Palette) */
+      --status-pending: #b45309;
+      --status-pending-bg: #fef3c7;
+      --status-assigned: #0369a1;
+      --status-assigned-bg: #e0f2fe;
+      --status-in-progress: #4338ca;
+      --status-in-progress-bg: #eef2ff;
+      --status-resolved: #15803d;
+      --status-resolved-bg: #dcfce7;
+      --status-rejected: #b91c1c;
+      --status-rejected-bg: #fee2e2;
 
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --text-subtle: #64748b;
+      /* High-Legibility Typography */
+      --text-main: #0f172a;          /* Slate 900 */
+      --text-muted: #475569;         /* Slate 600 */
+      --text-subtle: #94a3b8;        /* Slate 400 */
       
+      /* Radii & Elevations */
       --radius-sm: 8px;
       --radius-md: 12px;
       --radius-lg: 16px;
-      --radius-xl: 22px;
+      --radius-xl: 20px;
       
-      --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.25);
-      --shadow-lg: 0 20px 40px -15px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.06);
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.03);
+      --shadow-md: 0 4px 14px -2px rgba(15, 23, 42, 0.07), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
+      --shadow-lg: 0 20px 35px -8px rgba(15, 23, 42, 0.12), 0 8px 12px -6px rgba(15, 23, 42, 0.05);
       --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
@@ -72,7 +89,7 @@
     }
 
     body {
-      background: radial-gradient(circle at 50% 0%, #151d30 0%, var(--bg-base) 75%);
+      background: var(--bg-base);
       color: var(--text-main);
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
       min-height: 100vh;
@@ -97,38 +114,41 @@
       background: var(--bg-base);
     }
     ::-webkit-scrollbar-thumb {
-      background: #27354f;
+      background: #cbd5e1;
       border-radius: 99px;
     }
 
-    /* Top Master Navigation Bar */
+    /* ==========================================================================
+       TOP NAVIGATION BAR
+       ========================================================================== */
     .navbar {
       position: sticky;
       top: 0;
       z-index: 1000;
-      background: rgba(9, 13, 22, 0.88);
+      background: rgba(255, 255, 255, 0.94);
       backdrop-filter: blur(14px);
-      border-bottom: 1px solid var(--border-light);
-      padding: 12px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 12px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 16px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       cursor: pointer;
       text-decoration: none;
       color: inherit;
     }
 
     .brand-logo {
-      width: 34px;
-      height: 34px;
-      background: linear-gradient(135deg, #6366f1, #c084fc);
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
       border-radius: 10px;
       display: flex;
       align-items: center;
@@ -146,12 +166,11 @@
       font-weight: 800;
       font-size: 1.18rem;
       letter-spacing: -0.02em;
+      color: var(--text-main);
     }
 
     .brand-text span {
-      background: linear-gradient(135deg, #818cf8, #c084fc);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: var(--primary);
     }
 
     .brand-sub {
@@ -164,65 +183,12 @@
       font-family: 'JetBrains Mono', monospace;
     }
 
-    .nav-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    /* Role Pill Switcher */
-    .role-badge-btn {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      border-radius: 999px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      cursor: pointer;
-      transition: var(--transition);
-      background: rgba(255, 255, 255, 0.04);
-      color: var(--text-main);
-    }
-    .role-badge-btn:hover {
-      background: rgba(255, 255, 255, 0.08);
-    }
-    .role-badge-btn.role-student {
-      border-color: rgba(99, 102, 241, 0.4);
-      background: rgba(99, 102, 241, 0.12);
-      color: #a5b4fc;
-    }
-    .role-badge-btn.role-admin {
-      border-color: rgba(245, 158, 11, 0.4);
-      background: rgba(245, 158, 11, 0.12);
-      color: #fbbf24;
-    }
-
-    .icon-btn {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid var(--border-light);
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-    .icon-btn:hover {
-      color: var(--text-main);
-      background: rgba(255, 255, 255, 0.08);
-    }
-
     /* Desktop Navigation Tabs */
     .desktop-tabs {
       display: none;
       align-items: center;
       gap: 4px;
-      background: #101624;
+      background: var(--bg-muted);
       padding: 4px;
       border-radius: 12px;
       border: 1px solid var(--border-subtle);
@@ -249,19 +215,74 @@
     }
     .tab-btn:hover {
       color: var(--text-main);
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.7);
     }
     .tab-btn.active {
-      background: var(--primary);
-      color: #fff;
-      box-shadow: 0 2px 8px var(--primary-glow);
+      background: #ffffff;
+      color: var(--primary);
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
     }
 
-    /* Presentation Highlight Banner */
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Role Pill Switcher */
+    .role-badge-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border: 1px solid var(--border-subtle);
+      cursor: pointer;
+      transition: var(--transition);
+      background: #ffffff;
+      color: var(--text-main);
+    }
+    .role-badge-btn:hover {
+      background: #f8fafc;
+      border-color: var(--border-hover);
+    }
+    .role-badge-btn.role-student {
+      border-color: #c7d2fe;
+      background: #eef2ff;
+      color: #4338ca;
+    }
+    .role-badge-btn.role-admin {
+      border-color: #fde68a;
+      background: #fef3c7;
+      color: #b45309;
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: #ffffff;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .icon-btn:hover {
+      color: var(--text-main);
+      border-color: var(--border-hover);
+      background: #f8fafc;
+    }
+
+    /* Presentation Context Banner */
     .presentation-banner {
-      background: linear-gradient(90deg, rgba(99, 102, 241, 0.12), rgba(192, 132, 252, 0.12));
-      border-bottom: 1px solid rgba(99, 102, 241, 0.2);
-      padding: 8px 20px;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 8px 24px;
       font-size: 0.78rem;
       display: flex;
       align-items: center;
@@ -275,16 +296,17 @@
       flex-wrap: wrap;
     }
     .banner-badge {
-      background: rgba(99, 102, 241, 0.2);
-      color: #c7d2fe;
-      padding: 2px 8px;
+      background: #f1f5f9;
+      color: #334155;
+      padding: 3px 10px;
       border-radius: 999px;
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.7rem;
       font-weight: 600;
+      border: 1px solid var(--border-subtle);
     }
     .qr-trigger {
-      color: #a5b4fc;
+      color: var(--primary);
       background: none;
       border: none;
       cursor: pointer;
@@ -292,25 +314,29 @@
       display: flex;
       align-items: center;
       gap: 4px;
-      text-decoration: underline;
       font-size: 0.78rem;
+      transition: var(--transition);
+    }
+    .qr-trigger:hover {
+      text-decoration: underline;
     }
 
-    /* Main Content Container */
+    /* ==========================================================================
+       MAIN CONTENT CONTAINER & AIRY HEADER
+       ========================================================================== */
     .main-container {
-      max-width: 1200px;
+      max-width: 1180px;
       width: 100%;
       margin: 0 auto;
-      padding: 20px;
+      padding: 24px 20px 40px 20px;
       flex: 1;
     }
 
-    /* Hero / Header Filter Area */
     .header-section {
       display: flex;
       flex-direction: column;
       gap: 16px;
-      margin-bottom: 24px;
+      margin-bottom: 22px;
     }
     @media (min-width: 768px) {
       .header-section {
@@ -321,13 +347,14 @@
     }
 
     .hero-title h1 {
-      font-size: 1.5rem;
+      font-size: 1.55rem;
       font-weight: 800;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.025em;
+      color: var(--text-main);
     }
     .hero-title p {
       color: var(--text-muted);
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       margin-top: 4px;
     }
 
@@ -340,7 +367,7 @@
     .search-input-wrapper {
       position: relative;
       flex: 1;
-      min-width: 200px;
+      min-width: 220px;
     }
     .search-input-wrapper svg {
       position: absolute;
@@ -353,23 +380,24 @@
     }
     .search-input {
       width: 100%;
-      padding: 10px 14px 10px 36px;
-      background: var(--bg-surface);
+      padding: 10px 14px 10px 38px;
+      background: #ffffff;
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md);
       color: var(--text-main);
       font-size: 0.88rem;
       outline: none;
       transition: var(--transition);
+      box-shadow: var(--shadow-sm);
     }
     .search-input:focus {
       border-color: var(--primary);
-      box-shadow: 0 0 0 2px var(--primary-glow);
+      box-shadow: 0 0 0 3px var(--primary-glow);
     }
 
     /* Primary Action Button (New Report) */
     .btn-new-report {
-      background: linear-gradient(135deg, #6366f1, #818cf8);
+      background: var(--primary);
       color: #fff;
       border: none;
       padding: 10px 20px;
@@ -380,14 +408,14 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      box-shadow: 0 4px 16px var(--primary-glow);
+      box-shadow: 0 4px 14px var(--primary-glow);
       transition: var(--transition);
       white-space: nowrap;
     }
     .btn-new-report:hover {
+      background: var(--primary-hover);
       transform: translateY(-1px);
-      box-shadow: 0 6px 20px var(--primary-glow);
-      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      box-shadow: 0 6px 18px var(--primary-glow);
     }
 
     /* Category Filter Pills */
@@ -396,7 +424,7 @@
       gap: 8px;
       overflow-x: auto;
       padding-bottom: 4px;
-      margin-bottom: 20px;
+      margin-bottom: 22px;
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
@@ -404,41 +432,47 @@
       display: none;
     }
     .pill {
-      background: var(--bg-surface);
+      background: #ffffff;
       border: 1px solid var(--border-subtle);
       color: var(--text-muted);
-      padding: 6px 14px;
+      padding: 7px 15px;
       border-radius: 999px;
-      font-size: 0.78rem;
+      font-size: 0.8rem;
       font-weight: 600;
       cursor: pointer;
       white-space: nowrap;
       transition: var(--transition);
+      box-shadow: var(--shadow-sm);
     }
     .pill:hover {
-      border-color: rgba(255, 255, 255, 0.2);
+      border-color: var(--border-hover);
       color: var(--text-main);
+      background: #fbfcfe;
     }
     .pill.active {
-      background: rgba(99, 102, 241, 0.15);
+      background: var(--primary-bg);
       border-color: var(--primary);
-      color: #a5b4fc;
+      color: var(--primary);
+      font-weight: 700;
     }
 
-    /* Stats Row (Admin View) */
+    /* ==========================================================================
+       ADMIN STATS BANNER (Relocated cleanly to Admin Console)
+       ========================================================================== */
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 12px;
-      margin-bottom: 24px;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 14px;
+      margin-bottom: 26px;
     }
     .stat-card {
-      background: var(--bg-surface);
+      background: #ffffff;
       border: 1px solid var(--border-subtle);
-      padding: 14px 16px;
+      padding: 16px 18px;
       border-radius: var(--radius-md);
       position: relative;
       overflow: hidden;
+      box-shadow: var(--shadow-sm);
     }
     .stat-card::after {
       content: '';
@@ -450,63 +484,82 @@
       background: var(--card-accent, var(--primary));
     }
     .stat-val {
-      font-size: 1.6rem;
+      font-size: 1.65rem;
       font-weight: 800;
       font-family: 'JetBrains Mono', monospace;
+      color: var(--text-main);
       margin-top: 4px;
     }
     .stat-label {
       color: var(--text-subtle);
-      font-size: 0.75rem;
-      font-weight: 600;
+      font-size: 0.74rem;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
 
-    /* Submissions Feed Cards */
+    /* ==========================================================================
+       INLINE EXPANDABLE PROBLEM CARDS (ACCORDION)
+       ========================================================================== */
     .feed-grid {
       display: grid;
       grid-template-columns: 1fr;
       gap: 14px;
     }
-    @media (min-width: 768px) {
-      .feed-grid {
-        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-        gap: 16px;
-      }
-    }
 
     .issue-card {
-      background: var(--bg-card);
+      background: #ffffff;
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-lg);
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      transition: var(--transition);
+      padding: 16px 20px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
-    }
-    .issue-card:hover {
-      border-color: rgba(255, 255, 255, 0.15);
-      background: var(--bg-card-hover);
-      transform: translateY(-2px);
+      cursor: pointer;
       box-shadow: var(--shadow-sm);
     }
-
-    .card-top {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 12px;
+    .issue-card:hover {
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-md);
+      background: var(--bg-card-hover);
     }
-    .card-badges {
+    .issue-card.expanded {
+      border-color: #cbd5e1;
+      box-shadow: var(--shadow-md);
+      background: #ffffff;
+    }
+
+    /* 1. Minimal Collapsed Summary Row */
+    .card-summary-row {
       display: flex;
       align-items: center;
-      gap: 6px;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .card-left-badges {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       flex-wrap: wrap;
     }
+    .card-right-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-timestamp {
+      color: var(--text-subtle);
+      font-size: 0.74rem;
+      font-weight: 500;
+    }
+    .ticket-id {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--text-subtle);
+      font-weight: 600;
+    }
+
     .badge {
       padding: 3px 8px;
       border-radius: 6px;
@@ -514,9 +567,17 @@
       font-weight: 700;
       text-transform: uppercase;
       font-family: 'JetBrains Mono', monospace;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
-    .badge-issue { background: rgba(239, 68, 68, 0.15); color: #f87171; }
-    .badge-suggestion { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+    .badge-category {
+      background: var(--primary-bg);
+      color: var(--primary);
+      border: 1px solid #c7d2fe;
+    }
+    .badge-issue { background: #fee2e2; color: #b91c1c; }
+    .badge-suggestion { background: #e0f2fe; color: #0369a1; }
     
     .badge-pending { background: var(--status-pending-bg); color: var(--status-pending); }
     .badge-assigned { background: var(--status-assigned-bg); color: var(--status-assigned); }
@@ -524,78 +585,35 @@
     .badge-resolved { background: var(--status-resolved-bg); color: var(--status-resolved); }
     .badge-rejected { background: var(--status-rejected-bg); color: var(--status-rejected); }
 
-    .badge-priority-high { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
-    .badge-priority-med { background: rgba(245, 158, 11, 0.2); color: #fde68a; }
-    .badge-priority-low { background: rgba(100, 116, 139, 0.2); color: #cbd5e1; }
+    .badge-priority-high { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+    .badge-priority-med { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .badge-priority-low { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
 
     .card-title {
-      font-size: 1.05rem;
+      font-size: 1.06rem;
       font-weight: 700;
       color: var(--text-main);
       line-height: 1.35;
-      margin-bottom: 6px;
-    }
-    .card-desc {
-      color: var(--text-muted);
-      font-size: 0.85rem;
-      line-height: 1.5;
-      margin-bottom: 14px;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
+      margin-bottom: 10px;
     }
 
-    .card-meta {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      color: var(--text-subtle);
-      font-size: 0.76rem;
-      margin-bottom: 16px;
-    }
-    .card-meta-item {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .resolution-box {
-      background: rgba(16, 185, 129, 0.08);
-      border-left: 3px solid var(--status-resolved);
-      border-radius: 4px;
-      padding: 8px 12px;
-      margin-bottom: 14px;
-      font-size: 0.8rem;
-    }
-    .resolution-title {
-      color: var(--status-resolved);
-      font-weight: 700;
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      margin-bottom: 2px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .card-actions {
+    /* Actions & Expand Strip (Always Visible) */
+    .card-actions-strip {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-top: 1px solid var(--border-subtle);
-      padding-top: 14px;
+      gap: 10px;
     }
 
     /* Hype Upvote Button */
     .btn-hype {
-      background: rgba(249, 115, 22, 0.1);
-      border: 1px solid rgba(249, 115, 22, 0.3);
-      color: #fdba74;
-      padding: 6px 14px;
+      background: var(--accent-flame-bg);
+      border: 1px solid var(--accent-flame-border);
+      color: var(--accent-flame);
+      padding: 5px 14px;
       border-radius: 999px;
       font-weight: 700;
-      font-size: 0.84rem;
+      font-size: 0.82rem;
       display: flex;
       align-items: center;
       gap: 6px;
@@ -604,63 +622,363 @@
       font-family: 'JetBrains Mono', monospace;
     }
     .btn-hype:hover {
-      background: rgba(249, 115, 22, 0.2);
+      background: #ffedd5;
       border-color: var(--accent-flame);
-      transform: scale(1.03);
+      transform: scale(1.02);
     }
     .btn-hype.hyped {
       background: var(--accent-flame);
-      color: #fff;
+      color: #ffffff;
       border-color: var(--accent-flame);
-      box-shadow: 0 2px 10px var(--accent-flame-glow);
-    }
-    .btn-hype.hyped .flame-icon {
-      animation: flameBounce 0.35s ease;
+      box-shadow: 0 2px 8px var(--accent-flame-glow);
     }
 
-    @keyframes flameBounce {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.4) rotate(-10deg); }
-      100% { transform: scale(1); }
+    .expand-cue {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      color: var(--text-subtle);
+      font-weight: 500;
+    }
+    .expand-chevron {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: #f1f5f9;
+      color: var(--text-muted);
+      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s ease;
+    }
+    .issue-card:hover .expand-chevron {
+      background: #e2e8f0;
+      color: var(--text-main);
+    }
+    .issue-card.expanded .expand-chevron {
+      transform: rotate(180deg);
+      background: var(--primary-bg);
+      color: var(--primary);
+    }
+
+    /* 2. Expandable Tray (CSS Grid Animated Progressive Disclosure) */
+    .card-expandable-content {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.26s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, margin-top 0.2s ease;
+      opacity: 0;
+      margin-top: 0;
+    }
+    .issue-card.expanded .card-expandable-content {
+      grid-template-rows: 1fr;
+      opacity: 1;
+      margin-top: 14px;
+    }
+    .card-expandable-inner {
+      overflow: hidden;
+    }
+
+    .detail-divider {
+      height: 1px;
+      background: var(--border-subtle);
+      margin-bottom: 14px;
+    }
+
+    .detail-section {
+      margin-bottom: 12px;
+    }
+    .detail-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-subtle);
+      margin-bottom: 4px;
+    }
+    .card-desc {
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      line-height: 1.55;
+    }
+
+    .detail-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      margin-bottom: 12px;
+    }
+    .detail-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Official University Resolution Box */
+    .resolution-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      border-left: 4px solid var(--status-resolved);
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+    }
+    .resolution-title {
+      color: var(--status-resolved);
+      font-weight: 700;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .resolution-text {
+      color: #14532d;
+      font-size: 0.84rem;
+      line-height: 1.5;
+    }
+
+    .detail-footer-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 10px;
+      border-top: 1px dashed var(--border-subtle);
+    }
+    .receipt-pill {
+      font-size: 0.74rem;
+      color: var(--primary);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      background: var(--primary-bg);
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid #c7d2fe;
     }
 
     .admin-action-btn {
-      background: rgba(255, 255, 255, 0.05);
+      background: #ffffff;
       border: 1px solid var(--border-subtle);
-      color: var(--text-muted);
-      padding: 6px 12px;
+      color: var(--text-main);
+      padding: 6px 14px;
       border-radius: var(--radius-sm);
-      font-size: 0.76rem;
+      font-size: 0.78rem;
       font-weight: 600;
       cursor: pointer;
       transition: var(--transition);
+      box-shadow: var(--shadow-sm);
     }
     .admin-action-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
+      background: #f8fafc;
+      border-color: var(--border-hover);
+      color: var(--primary);
+    }
+
+    /* ==========================================================================
+       MODALS, FORMS, & UTILITIES
+       ========================================================================== */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(6px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+    .modal-backdrop.open {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal-content {
+      background: #ffffff;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      max-width: 540px;
+      width: 100%;
+      padding: 26px;
+      box-shadow: var(--shadow-lg);
+      transform: translateY(16px);
+      transition: transform 0.25s ease;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-backdrop.open .modal-content {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+    }
+    .modal-close {
+      background: #f1f5f9;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      transition: var(--transition);
+    }
+    .modal-close:hover {
+      background: #e2e8f0;
       color: var(--text-main);
     }
 
-    /* Mobile Bottom Navigation Bar */
+    /* Forms */
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 6px;
+    }
+    .form-control {
+      width: 100%;
+      padding: 10px 14px;
+      background: #f8fafc;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      color: var(--text-main);
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+      transition: var(--transition);
+    }
+    .form-control:focus {
+      background: #ffffff;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+    }
+    textarea.form-control {
+      resize: vertical;
+      min-height: 80px;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .anonymity-notice {
+      background: #f5f3ff;
+      border: 1px dashed #c4b5fd;
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      font-size: 0.8rem;
+      color: #5b21b6;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    /* QR Code Display */
+    .qr-box {
+      background: #ffffff;
+      padding: 16px;
+      border-radius: 14px;
+      border: 1px solid var(--border-subtle);
+      display: inline-block;
+      margin: 14px 0;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Empty State */
+    .empty-state {
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--text-subtle);
+      background: #ffffff;
+      border: 1px dashed var(--border-subtle);
+      border-radius: var(--radius-lg);
+    }
+    .empty-state svg {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 12px;
+      opacity: 0.5;
+      color: var(--text-subtle);
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 84px;
+      right: 20px;
+      left: 20px;
+      max-width: 380px;
+      margin: 0 auto;
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: #ffffff;
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      font-size: 0.86rem;
+      font-weight: 500;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      z-index: 3000;
+      animation: fadeIn 0.2s ease;
+    }
+    @media (min-width: 900px) {
+      .toast {
+        left: auto;
+        bottom: 24px;
+      }
+    }
+
+    /* Mobile Bottom Nav */
     .mobile-bottom-nav {
       position: fixed;
       bottom: 0;
       left: 0;
       right: 0;
       height: 64px;
-      background: rgba(11, 15, 23, 0.95);
+      background: rgba(255, 255, 255, 0.96);
       backdrop-filter: blur(16px);
-      border-top: 1px solid var(--border-light);
+      border-top: 1px solid var(--border-subtle);
       display: flex;
       align-items: center;
       justify-content: space-around;
       z-index: 1000;
+      box-shadow: 0 -2px 10px rgba(15, 23, 42, 0.04);
     }
     @media (min-width: 900px) {
       .mobile-bottom-nav {
         display: none;
       }
     }
-
     .nav-item {
       display: flex;
       flex-direction: column;
@@ -677,7 +995,6 @@
       padding: 8px 12px;
       border-radius: 12px;
       transition: var(--transition);
-      position: relative;
     }
     .nav-item svg {
       width: 20px;
@@ -686,187 +1003,28 @@
     .nav-item.active {
       color: var(--primary);
     }
-    .nav-item.active svg {
-      color: var(--primary);
-      filter: drop-shadow(0 0 6px var(--primary-glow));
-    }
     .nav-item.nav-report-pill {
       background: var(--primary);
       color: #fff;
       border-radius: 999px;
-      padding: 8px 14px;
+      padding: 8px 16px;
       box-shadow: 0 4px 14px var(--primary-glow);
     }
     .nav-item.nav-report-pill svg {
       color: #fff;
     }
 
-    /* Modals & Slide-up Sheets */
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(6px);
-      z-index: 2000;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-      opacity: 0;
-      transition: opacity 0.25s ease;
-    }
-    .modal-backdrop.open {
-      display: flex;
-      opacity: 1;
-    }
-
-    .modal-content {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius-xl);
-      max-width: 540px;
-      width: 100%;
-      padding: 24px;
-      box-shadow: var(--shadow-lg);
-      transform: translateY(20px);
-      transition: transform 0.25s ease;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-    .modal-backdrop.open .modal-content {
-      transform: translateY(0);
-    }
-
-    .modal-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
-    .modal-title {
-      font-size: 1.25rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-    }
-    .modal-close {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      padding: 6px;
-    }
-
-    /* Form Styles */
-    .form-group {
-      margin-bottom: 16px;
-    }
-    .form-label {
-      display: block;
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      margin-bottom: 6px;
-    }
-    .form-control {
-      width: 100%;
-      padding: 10px 14px;
-      background: #151d2f;
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      color: var(--text-main);
-      font-size: 0.9rem;
-      font-family: inherit;
-      outline: none;
-      transition: var(--transition);
-    }
-    .form-control:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 2px var(--primary-glow);
-    }
-    textarea.form-control {
-      resize: vertical;
-      min-height: 80px;
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    .anonymity-notice {
-      background: rgba(99, 102, 241, 0.08);
-      border: 1px dashed rgba(99, 102, 241, 0.4);
-      padding: 10px 14px;
-      border-radius: var(--radius-md);
-      font-size: 0.78rem;
-      color: #c7d2fe;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 18px;
-    }
-
-    /* QR Code Modal Box */
-    .qr-box {
-      background: #fff;
-      padding: 16px;
-      border-radius: 16px;
-      display: inline-block;
-      margin: 16px 0;
-    }
-
-    /* Empty State */
-    .empty-state {
-      padding: 60px 20px;
-      text-align: center;
-      color: var(--text-subtle);
-    }
-    .empty-state svg {
-      width: 48px;
-      height: 48px;
-      margin-bottom: 12px;
-      opacity: 0.4;
-    }
-
-    /* Toast notification */
-    .toast {
-      position: fixed;
-      bottom: 84px;
-      right: 20px;
-      left: 20px;
-      max-width: 400px;
-      margin: 0 auto;
-      background: #1e293b;
-      border: 1px solid var(--primary);
-      color: #fff;
-      padding: 12px 18px;
-      border-radius: var(--radius-md);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-      font-size: 0.85rem;
-      display: none;
-      align-items: center;
-      gap: 10px;
-      z-index: 3000;
-      animation: fadeIn 0.2s ease;
-    }
-    @media (min-width: 900px) {
-      .toast {
-        left: auto;
-        bottom: 24px;
-      }
-    }
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
+      from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
 
-  <!-- MASTER TOP NAVIGATION -->
+  <!-- ========================================================================
+       TOP MASTER NAVIGATION BAR
+       ======================================================================== -->
   <header class="navbar">
     <a href="#" class="brand" onclick="setFilterCategory('ALL'); setActiveTab('feed');">
       <div class="brand-logo">
@@ -932,42 +1090,44 @@
       <span class="banner-badge" id="sync-indicator">⚡ Supabase Live Sync</span>
     </div>
     <button class="qr-trigger" onclick="openQrModal()">
-      <span>📲 Phone QR Code</span>
+      <span>📲 Phone Demo QR</span>
     </button>
   </div>
 
-  <!-- MAIN CONTAINER -->
+  <!-- ========================================================================
+       MAIN APPLICATION WORKSPACE
+       ======================================================================== -->
   <main class="main-container">
 
-    <!-- Admin Stats Summary (Visible when in Admin tab or Admin mode) -->
+    <!-- Admin KPI Stat Cards (Cleanly displayed ONLY in Admin Console) -->
     <div id="admin-stats-area" class="stats-grid" style="display:none;">
-      <div class="stat-card" style="--card-accent: #6366f1;">
+      <div class="stat-card" style="--card-accent: #4f46e5;">
         <div class="stat-label">Total Submissions</div>
         <div class="stat-val" id="stat-total">0</div>
       </div>
-      <div class="stat-card" style="--card-accent: #f59e0b;">
-        <div class="stat-label">Pending Review</div>
+      <div class="stat-card" style="--card-accent: #b45309;">
+        <div class="stat-label">Pending Triage</div>
         <div class="stat-val" id="stat-pending">0</div>
       </div>
-      <div class="stat-card" style="--card-accent: #818cf8;">
+      <div class="stat-card" style="--card-accent: #4338ca;">
         <div class="stat-label">In Progress</div>
         <div class="stat-val" id="stat-in-progress">0</div>
       </div>
-      <div class="stat-card" style="--card-accent: #10b981;">
+      <div class="stat-card" style="--card-accent: #15803d;">
         <div class="stat-label">Resolved</div>
         <div class="stat-val" id="stat-resolved">0</div>
       </div>
-      <div class="stat-card" style="--card-accent: #f97316;">
+      <div class="stat-card" style="--card-accent: #ea580c;">
         <div class="stat-label">Total Upvotes 🔥</div>
         <div class="stat-val" id="stat-hype">0</div>
       </div>
     </div>
 
-    <!-- Header Actions & Search -->
+    <!-- Header & Action Section -->
     <div class="header-section">
       <div class="hero-title">
         <h1 id="view-title">Campus Feed</h1>
-        <p id="view-subtitle">Report infrastructure defects and upvote high-impact campus issues.</p>
+        <p id="view-subtitle">Report infrastructure defects and track college improvements with crowd prioritization.</p>
       </div>
 
       <div class="search-and-filter">
@@ -979,8 +1139,8 @@
           <input type="text" id="search-input" class="search-input" placeholder="Search issues, labs, blocks..." oninput="handleSearch()">
         </div>
 
-        <button class="btn-new-report" onclick="openReportModal()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <button class="btn-new-report" id="btn-header-report" onclick="openReportModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="12" y1="5" x2="12" y2="19"></line>
             <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
@@ -1000,11 +1160,12 @@
       <button class="pill" onclick="setFilterCategory('GENERAL')">📌 General</button>
     </div>
 
-    <!-- Submissions Cards Grid -->
+    <!-- Submissions Cards Grid (Accordion Progressive Disclosure) -->
     <div class="feed-grid" id="submissions-feed">
-      <!-- Dynamically Rendered -->
+      <!-- Dynamically rendered via createCardHtml() -->
     </div>
 
+    <!-- Empty State -->
     <div id="empty-state-view" class="empty-state" style="display:none;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="10"></circle>
@@ -1013,12 +1174,14 @@
         <line x1="15" y1="9" x2="15.01" y2="9"></line>
       </svg>
       <h3>No campus reports found</h3>
-      <p>Try clearing your search or category filter, or file a new issue!</p>
+      <p>Try clearing your search or category filter, or file a new anonymous issue!</p>
     </div>
 
   </main>
 
-  <!-- MOBILE BOTTOM NAVIGATION BAR -->
+  <!-- ========================================================================
+       MOBILE BOTTOM NAVIGATION BAR
+       ======================================================================== -->
   <nav class="mobile-bottom-nav">
     <button class="nav-item active" id="mtab-feed" onclick="setActiveTab('feed')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1035,7 +1198,7 @@
       <span>Trending</span>
     </button>
 
-    <button class="nav-item nav-report-pill" onclick="openReportModal()">
+    <button class="nav-item nav-report-pill" id="mtab-report" onclick="openReportModal()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <line x1="12" y1="5" x2="12" y2="19"></line>
         <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -1060,7 +1223,9 @@
     </button>
   </nav>
 
-  <!-- MODAL: NEW ANONYMOUS REPORT -->
+  <!-- ========================================================================
+       MODAL: NEW ANONYMOUS REPORT (VAULT INTEGRATED)
+       ======================================================================== -->
   <div class="modal-backdrop" id="report-modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -1069,11 +1234,11 @@
       </div>
 
       <div class="anonymity-notice">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6d28d9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
           <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
         </svg>
-        <span><strong>Anonymity Vault Protected:</strong> No student identification is written to the public database ticket.</span>
+        <span><strong>Anonymity Vault Protected:</strong> No student identification is attached to the public ticket. Only your private receipt token is stored.</span>
       </div>
 
       <form id="report-form" onsubmit="handleNewReport(event)">
@@ -1139,7 +1304,9 @@
     </div>
   </div>
 
-  <!-- MODAL: ADMIN STATUS TRANSITION & RESOLUTION NOTE -->
+  <!-- ========================================================================
+       MODAL: ADMIN STATUS TRANSITION & RESOLUTION NOTE
+       ======================================================================== -->
   <div class="modal-backdrop" id="admin-status-modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -1148,8 +1315,8 @@
       </div>
 
       <div class="form-group">
-        <div id="admin-modal-ticket-title" style="font-weight: 700; font-size: 1.05rem; margin-bottom: 4px;"></div>
-        <div id="admin-modal-ticket-meta" style="color: var(--text-subtle); font-size: 0.8rem;"></div>
+        <div id="admin-modal-ticket-title" style="font-weight: 700; font-size: 1.05rem; margin-bottom: 4px; color: var(--text-main);"></div>
+        <div id="admin-modal-ticket-meta" style="color: var(--text-muted); font-size: 0.8rem;"></div>
       </div>
 
       <div class="form-group">
@@ -1175,7 +1342,9 @@
     </div>
   </div>
 
-  <!-- MODAL: PRESENTATION QR CODE (Instant Phone Access) -->
+  <!-- ========================================================================
+       MODAL: PRESENTATION QR CODE (Instant Phone Access)
+       ======================================================================== -->
   <div class="modal-backdrop" id="qr-modal">
     <div class="modal-content" style="text-align: center;">
       <div class="modal-header">
@@ -1184,12 +1353,12 @@
       </div>
 
       <p style="color: var(--text-muted); font-size: 0.85rem;">
-        Scan this QR code with your phone camera or evaluator's phone to open AURA instantly!
+        Scan this QR code with your mobile camera to test responsiveness & live upvoting!
       </p>
 
       <div id="qrcode-container" class="qr-box"></div>
 
-      <div style="background: #111827; border: 1px solid var(--border-subtle); border-radius: 8px; padding: 8px 12px; margin: 12px 0; word-break: break-all; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: #a5b4fc;">
+      <div style="background: #f8fafc; border: 1px solid var(--border-subtle); border-radius: 8px; padding: 8px 12px; margin: 12px 0; word-break: break-all; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--primary);">
         <span id="current-url-display"></span>
       </div>
 
@@ -1205,16 +1374,40 @@
     <span id="toast-message">Action successful</span>
   </div>
 
+  <!-- ========================================================================
+       AURA CLIENT APPLICATION JAVASCRIPT
+       ======================================================================== -->
   <script>
-    // ============================================================================
-    // AURA CAMPUS PLATFORM — STATE MANAGEMENT & SEED DATA
+    /**
+     * ============================================================================
+     * AURA CAMPUS GOVERNANCE — CLIENT ARCHITECTURE (KTU CST205 / CSL203)
+     * ============================================================================
+     * Core Concepts Explained for Evaluator Viva:
+     * 1. Decoupled Anonymity Vault: No student ID is ever linked to public tickets.
+     *    Receipt tokens exist client-side only (stored via localStorage).
+     * 2. Crowd Hype Prioritization: Students upvote urgent campus defects to push
+     *    them to the top of the Trending feed automatically.
+     * 3. Progressive Disclosure UI: Problem cards maintain an airy, minimal preview
+     *    by default, expanding in-place (accordion) upon interaction.
+     * ============================================================================
+     */
+
+    // Category Icon Mapping
+    const CATEGORY_ICONS = {
+      'IT_INFRASTRUCTURE': '💻',
+      'ELECTRICAL': '⚡',
+      'CIVIL_MAINTENANCE': '🏗️',
+      'ACADEMIC_LABS': '🔬',
+      'HOSTEL_MESS': '🍲',
+      'GENERAL': '📌'
+    };
+
     // Aligned with sql/seed.sql and presentation Slide 21
-    // ============================================================================
     const DEFAULT_DATA = [
       {
         id: 104,
         title: "Lab 3 Projector Lamp Faulty",
-        description: "The overhead projector in CSE Lab 3 flickers continuously during lectures and shuts off every 10 minutes.",
+        description: "The overhead projector in CSE Lab 3 flickers continuously during lectures and shuts off every 10 minutes, disrupting database lab sessions.",
         type: "ISSUE",
         category: "IT_INFRASTRUCTURE",
         location: "CSE Block - Lab 3",
@@ -1229,7 +1422,7 @@
       {
         id: 103,
         title: "Extend Library Hours for Midterms",
-        description: "Requesting extended reading room operating hours up to 10:00 PM during mid-semester examination weeks.",
+        description: "Requesting extended reading room operating hours up to 10:00 PM during mid-semester examination weeks for all undergraduate departments.",
         type: "SUGGESTION",
         category: "ACADEMIC_LABS",
         location: "Central Library - 1st Floor",
@@ -1244,7 +1437,7 @@
       {
         id: 98,
         title: "Wi-Fi Disconnections in Block B",
-        description: "Wi-Fi connectivity completely drops near classrooms B201 and B204 in Mechanical Block B.",
+        description: "Wi-Fi connectivity completely drops near classrooms B201 and B204 in Mechanical Block B during peak lecture periods.",
         type: "ISSUE",
         category: "IT_INFRASTRUCTURE",
         location: "Mechanical Block B - 2nd Floor",
@@ -1254,12 +1447,12 @@
         isHyped: false,
         isMyReport: false,
         createdAt: "5 days ago",
-        resolutionNote: "Access Point firmware rebooted and dual-band channel frequency reconfigured by campus network team."
+        resolutionNote: "Access Point firmware rebooted and dual-band 5GHz channel frequency reconfigured by campus network team."
       },
       {
         id: 89,
         title: "Add Water Coolers on 2nd Floor",
-        description: "High foot traffic on Civil Block 2nd floor during break hours; an additional drinking water fountain is needed.",
+        description: "High foot traffic on Civil Block 2nd floor during break hours; an additional filtered drinking water fountain is needed.",
         type: "SUGGESTION",
         category: "CIVIL_MAINTENANCE",
         location: "Civil Engineering Block - 2nd Floor",
@@ -1269,12 +1462,12 @@
         isHyped: false,
         isMyReport: true,
         createdAt: "7 days ago",
-        resolutionNote: "Forwarded to Maintenance Committee for budget sanction."
+        resolutionNote: "Forwarded to Campus Maintenance Committee for budget sanction."
       },
       {
         id: 85,
         title: "Corridor Lights Flickering near LH3",
-        description: "Two tube lights are flickering violently in the 3rd floor lecture hall corridor creating severe glare.",
+        description: "Two tube lights are flickering violently in the 3rd floor lecture hall corridor creating severe glare and safety concerns.",
         type: "ISSUE",
         category: "ELECTRICAL",
         location: "Main Block - 3rd Floor LH3 Corridor",
@@ -1288,17 +1481,18 @@
       }
     ];
 
-    // App state
+    // Reactive State Store
     let state = {
-      role: 'STUDENT', // 'STUDENT' or 'ADMIN'
-      activeTab: 'feed', // 'feed', 'trending', 'my', 'admin'
+      role: 'STUDENT',             // 'STUDENT' or 'ADMIN'
+      activeTab: 'feed',           // 'feed', 'trending', 'my', 'admin'
       selectedCategory: 'ALL',
       searchQuery: '',
       submissions: [],
+      expandedCardIds: new Set(),  // Set of ticket IDs currently expanded
       adminTargetId: null
     };
 
-    // Initialize state from localStorage or seed
+    // Initialize application state from localStorage or seed defaults
     function initApp() {
       const stored = localStorage.getItem('aura_submissions_v2');
       if (stored) {
@@ -1312,12 +1506,12 @@
         saveData();
       }
 
-      // Check if URL has #admin or query
+      // Check URL parameters for direct role launch
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('role') === 'admin' || window.location.hash === '#admin') {
         state.role = 'ADMIN';
-        updateRoleUI();
       }
+      updateRoleUI();
 
       render();
       registerServiceWorker();
@@ -1327,52 +1521,89 @@
       localStorage.setItem('aura_submissions_v2', JSON.stringify(state.submissions));
     }
 
-    // Role Switching
+    // Role Switching (Student <-> Administrator)
     function toggleRole() {
       state.role = (state.role === 'STUDENT') ? 'ADMIN' : 'STUDENT';
       updateRoleUI();
-      if (state.role === 'ADMIN' && state.activeTab === 'feed') {
+      if (state.role === 'ADMIN') {
         setActiveTab('admin');
-      } else if (state.role === 'STUDENT' && state.activeTab === 'admin') {
-        setActiveTab('feed');
       } else {
-        render();
+        setActiveTab('feed');
       }
       showToast(`Switched to ${state.role === 'ADMIN' ? '🛡️ Administrator Console' : '🎓 Student Mode'}`);
     }
 
+    /**
+     * Strict Role-Based Access Control (RBAC) UI Synchronizer:
+     * - Admins: Hide "+ Report Issue", hide mobile report button, hide student receipts, show Admin Console.
+     * - Students: Show "+ Report Issue", show mobile report button, show student receipts, hide Admin Console.
+     */
     function updateRoleUI() {
       const btn = document.getElementById('role-toggle-btn');
       const icon = document.getElementById('role-icon');
       const text = document.getElementById('role-text');
       const exportBtn = document.getElementById('btn-export-csv');
+      const headerReportBtn = document.getElementById('btn-header-report');
+      const mobileReportBtn = document.getElementById('mtab-report');
+      const dTabMy = document.getElementById('dtab-my');
+      const mTabMy = document.getElementById('mtab-my');
+      const dTabAdmin = document.getElementById('dtab-admin');
+      const mTabAdmin = document.getElementById('mtab-admin');
 
       if (state.role === 'ADMIN') {
         btn.className = 'role-badge-btn role-admin';
         icon.innerText = '🛡️';
         text.innerText = 'Admin Mode';
-        exportBtn.style.display = 'flex';
+        if (exportBtn) exportBtn.style.display = 'flex';
+
+        // STRICT RBAC: Admins cannot file complaints
+        if (headerReportBtn) headerReportBtn.style.display = 'none';
+        if (mobileReportBtn) mobileReportBtn.style.display = 'none';
+
+        // STRICT RBAC: Admins have no student receipts; show Admin Console tab
+        if (dTabMy) dTabMy.style.display = 'none';
+        if (mTabMy) mTabMy.style.display = 'none';
+        if (dTabAdmin) dTabAdmin.style.display = 'flex';
+        if (mTabAdmin) mTabAdmin.style.display = 'flex';
       } else {
         btn.className = 'role-badge-btn role-student';
         icon.innerText = '🎓';
         text.innerText = 'Student Mode';
-        exportBtn.style.display = 'none';
+        if (exportBtn) exportBtn.style.display = 'none';
+
+        // Student Mode: Can file complaints
+        if (headerReportBtn) headerReportBtn.style.display = 'flex';
+        if (mobileReportBtn) mobileReportBtn.style.display = 'flex';
+
+        // Student Mode: Show student receipts; hide Admin Console tab
+        if (dTabMy) dTabMy.style.display = 'flex';
+        if (mTabMy) mTabMy.style.display = 'flex';
+        if (dTabAdmin) dTabAdmin.style.display = 'none';
+        if (mTabAdmin) mTabAdmin.style.display = 'none';
       }
     }
 
-    // Tab Navigation
+    // Tab Switching
     function setActiveTab(tab) {
+      // Prevent role leak
+      if (tab === 'my' && state.role === 'ADMIN') {
+        showToast('ℹ️ Receipts are only maintained for student submissions.');
+        setActiveTab('admin');
+        return;
+      }
+
       state.activeTab = tab;
-      
-      // Update Desktop tabs
-      ['feed', 'trending', 'my', 'admin'].forEach(t => {
+
+      // Update desktop and mobile tab indicators
+      const tabs = ['feed', 'trending', 'my', 'admin'];
+      tabs.forEach(t => {
         const dTab = document.getElementById(`dtab-${t}`);
         const mTab = document.getElementById(`mtab-${t}`);
         if (dTab) dTab.classList.toggle('active', t === tab);
         if (mTab) mTab.classList.toggle('active', t === tab);
       });
 
-      // Update titles
+      // Update titles and admin stats visibility
       const viewTitle = document.getElementById('view-title');
       const viewSubtitle = document.getElementById('view-subtitle');
       const adminStats = document.getElementById('admin-stats-area');
@@ -1383,19 +1614,19 @@
         adminStats.style.display = 'none';
       } else if (tab === 'my') {
         viewTitle.innerText = '🛡️ My Submission Receipts';
-        viewSubtitle.innerText = 'Your private anonymity vault. Only you can see your tracking receipts.';
+        viewSubtitle.innerText = 'Your private anonymity vault. Only you can view your submission receipts.';
         adminStats.style.display = 'none';
       } else if (tab === 'admin') {
         viewTitle.innerText = '⚙️ Administrative Action Console';
-        viewSubtitle.innerText = 'Assign, investigate, and publish official resolutions to student tickets.';
+        viewSubtitle.innerText = 'Review, assign, and publish official university resolutions to student reports.';
         adminStats.style.display = 'grid';
         if (state.role !== 'ADMIN') {
           state.role = 'ADMIN';
           updateRoleUI();
         }
       } else {
-        viewTitle.innerText = 'Campus Feed';
-        viewSubtitle.innerText = 'Report infrastructure defects and track college improvements.';
+        viewTitle.innerText = state.role === 'ADMIN' ? 'Campus Overview Feed' : 'Campus Feed';
+        viewSubtitle.innerText = state.role === 'ADMIN' ? 'Review student submissions and crowd priority rankings.' : 'Report infrastructure defects and track college improvements.';
         adminStats.style.display = 'none';
       }
 
@@ -1418,60 +1649,82 @@
     }
 
     function handleSearch() {
-      state.searchQuery = document.getElementById('search-input').value.trim().toLowerCase();
+      state.searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
       render();
     }
 
-    // Hype (Upvote) Engine
+    // Toggle Hype (Crowd Upvote) - Student Only
     function toggleHype(id, event) {
-      if (event) event.stopPropagation();
+      if (event) event.stopPropagation(); // Prevent card accordion from toggling
+
+      if (state.role === 'ADMIN') {
+        showToast('ℹ️ Admins view upvote counts for crowd triage; only students cast upvotes.');
+        return;
+      }
+
       const item = state.submissions.find(s => s.id === id);
       if (!item) return;
 
       if (item.isHyped) {
-        item.hypeCount = Math.max(0, item.hypeCount - 1);
         item.isHyped = false;
-        showToast('Upvote removed');
+        item.hypeCount = Math.max(0, item.hypeCount - 1);
+        showToast(`Flame removed from #${item.id}`);
       } else {
-        item.hypeCount += 1;
         item.isHyped = true;
-        showToast('🔥 Issue Hyped! Pushed higher on Trending list');
+        item.hypeCount += 1;
+        showToast(`🔥 Hyped #${item.id}! Priority boosted.`);
       }
 
       saveData();
       render();
     }
 
-    // Render Submissions
+    // Inline Accordion Toggle
+    function toggleCardExpand(id, event) {
+      // Toggle expanded state in Set
+      if (state.expandedCardIds.has(id)) {
+        state.expandedCardIds.delete(id);
+      } else {
+        state.expandedCardIds.add(id);
+      }
+
+      // Smooth DOM class toggle
+      const card = document.getElementById(`ticket-${id}`);
+      if (card) {
+        card.classList.toggle('expanded', state.expandedCardIds.has(id));
+      }
+    }
+
+    // Main Render Pipeline
     function render() {
       const feed = document.getElementById('submissions-feed');
       const emptyState = document.getElementById('empty-state-view');
 
+      // Filter by Tab
       let filtered = [...state.submissions];
 
-      // Tab filter
       if (state.activeTab === 'trending') {
         filtered.sort((a, b) => b.hypeCount - a.hypeCount);
       } else if (state.activeTab === 'my') {
         filtered = filtered.filter(s => s.isMyReport);
       } else if (state.activeTab === 'admin') {
-        // Admin sees all, sorted by pending/unresolved first
+        // In admin view show all, prioritizing pending and in-progress
         filtered.sort((a, b) => {
           if (a.status === 'PENDING' && b.status !== 'PENDING') return -1;
           if (a.status !== 'PENDING' && b.status === 'PENDING') return 1;
           return b.id - a.id;
         });
       } else {
-        // Default feed: newest first
+        // Standard Feed: Latest first
         filtered.sort((a, b) => b.id - a.id);
       }
 
-      // Category filter
+      // Filter by Category Pill
       if (state.selectedCategory !== 'ALL') {
         filtered = filtered.filter(s => s.category === state.selectedCategory);
       }
 
-      // Search filter
+      // Filter by Search Query
       if (state.searchQuery) {
         filtered = filtered.filter(s => 
           s.title.toLowerCase().includes(state.searchQuery) ||
@@ -1490,71 +1743,122 @@
         feed.innerHTML = filtered.map(item => createCardHtml(item)).join('');
       }
 
-      // Update admin stats
+      // Update KPI metrics
       updateAdminStats();
     }
 
+    /**
+     * Creates an inline-expandable problem card.
+     * Collapsed: Minimal vital summary (Title, Category, Status, Hype, Time).
+     * Expanded: Full description, Location, Priority, Ticket ID, Resolution box.
+     */
     function createCardHtml(item) {
       const statusBadgeClass = `badge-${item.status.toLowerCase().replace('_', '-')}`;
       const priorityBadgeClass = item.priority === 'HIGH' ? 'badge-priority-high' : (item.priority === 'MEDIUM' ? 'badge-priority-med' : 'badge-priority-low');
       const isHypedClass = item.isHyped ? 'hyped' : '';
+      const isExpanded = state.expandedCardIds.has(item.id);
+      const categoryIcon = CATEGORY_ICONS[item.category] || '📌';
 
       return `
-        <article class="issue-card" id="ticket-${item.id}">
-          <div>
-            <div class="card-top">
-              <div class="card-badges">
-                <span class="badge badge-${item.type.toLowerCase()}">${item.type}</span>
-                <span class="badge ${statusBadgeClass}">${item.status.replace('_', ' ')}</span>
-                <span class="badge ${priorityBadgeClass}">${item.priority}</span>
-              </div>
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-subtle);">#${item.id}</span>
+        <article class="issue-card ${isExpanded ? 'expanded' : ''}" id="ticket-${item.id}" onclick="toggleCardExpand(${item.id}, event)">
+          
+          <!-- 1. Minimal Collapsed Summary Row (Always Visible) -->
+          <div class="card-summary-row">
+            <div class="card-left-badges">
+              <span class="badge badge-category">${categoryIcon} ${item.category.replace('_', ' ')}</span>
+              <span class="badge ${statusBadgeClass}">${item.status.replace('_', ' ')}</span>
+              <span class="card-timestamp">🕒 ${item.createdAt}</span>
             </div>
-
-            <h3 class="card-title">${escapeHtml(item.title)}</h3>
-            <p class="card-desc">${escapeHtml(item.description)}</p>
-
-            ${item.resolutionNote ? `
-              <div class="resolution-box">
-                <div class="resolution-title">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                  </svg>
-                  Official Resolution
-                </div>
-                <div>${escapeHtml(item.resolutionNote)}</div>
-              </div>
-            ` : ''}
-
-            <div class="card-meta">
-              <div class="card-meta-item">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                  <circle cx="12" cy="10" r="3"></circle>
+            <div class="card-right-meta">
+              <span class="ticket-id">#${item.id}</span>
+              <span class="expand-chevron" title="Click to view details">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
-                <span>${escapeHtml(item.location)}</span>
-              </div>
-              <div class="card-meta-item">
-                <span>🕒 ${item.createdAt}</span>
-              </div>
+              </span>
             </div>
           </div>
 
-          <div class="card-actions">
-            <button class="btn-hype ${isHypedClass}" onclick="toggleHype(${item.id}, event)">
-              <span class="flame-icon">🔥</span>
-              <span class="hype-label">${item.isHyped ? 'Hyped' : 'Hype'}</span>
-              <span class="hype-count">${item.hypeCount}</span>
-            </button>
+          <!-- Problem Title -->
+          <h3 class="card-title">${escapeHtml(item.title)}</h3>
 
+          <!-- Action & Upvote Strip (Always Visible) -->
+          <div class="card-actions-strip">
             ${state.role === 'ADMIN' ? `
-              <button class="admin-action-btn" onclick="openAdminModal(${item.id})">
-                ⚙️ Update Status
+              <button class="btn-hype" style="opacity: 0.92; cursor: default; background: #fff7ed; border-color: #fed7aa; color: #ea580c;" onclick="toggleHype(${item.id}, event)" title="Crowd Prioritization: ${item.hypeCount} student upvotes (Display Only for Admins)">
+                <span class="flame-icon">🔥</span>
+                <span class="hype-label">Upvotes</span>
+                <span class="hype-count">${item.hypeCount}</span>
               </button>
-            ` : (item.isMyReport ? `
-              <span style="font-size: 0.72rem; color: #818cf8; font-family: 'JetBrains Mono', monospace;">🔑 My Receipt</span>
-            ` : '')}
+            ` : `
+              <button class="btn-hype ${isHypedClass}" onclick="toggleHype(${item.id}, event)" title="Upvote this campus issue">
+                <span class="flame-icon">🔥</span>
+                <span class="hype-label">${item.isHyped ? 'Hyped' : 'Hype'}</span>
+                <span class="hype-count">${item.hypeCount}</span>
+              </button>
+            `}
+
+            <div class="expand-cue">
+              <span>Click for details</span>
+            </div>
           </div>
+
+          <!-- 2. Expandable Details Tray (Progressive Disclosure) -->
+          <div class="card-expandable-content">
+            <div class="card-expandable-inner">
+              <div class="detail-divider"></div>
+              
+              <!-- Full Problem Description -->
+              <div class="detail-section">
+                <div class="detail-label">Problem Description</div>
+                <p class="card-desc">${escapeHtml(item.description)}</p>
+              </div>
+
+              <!-- Location & Priority -->
+              <div class="detail-meta-row">
+                <div class="detail-meta-item">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                  <span><strong>Location:</strong> ${escapeHtml(item.location)}</span>
+                </div>
+                <div class="detail-meta-item">
+                  <span><strong>Priority:</strong></span>
+                  <span class="badge ${priorityBadgeClass}">${item.priority}</span>
+                  <span class="badge badge-${item.type.toLowerCase()}">${item.type}</span>
+                </div>
+              </div>
+
+              <!-- Official Resolution Box (if resolved) -->
+              ${item.resolutionNote ? `
+                <div class="resolution-box">
+                  <div class="resolution-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Official University Resolution
+                  </div>
+                  <div class="resolution-text">${escapeHtml(item.resolutionNote)}</div>
+                </div>
+              ` : ''}
+
+              <!-- Admin Action or Student Anonymity Receipt -->
+              <div class="detail-footer-actions">
+                ${state.role === 'ADMIN' ? `
+                  <button class="admin-action-btn" onclick="openAdminModal(${item.id}); event.stopPropagation();">
+                    ⚙️ Update Ticket Status
+                  </button>
+                ` : (item.isMyReport ? `
+                  <span class="receipt-pill">🔑 Decoupled Anonymity Receipt (Verified)</span>
+                ` : `
+                  <span style="font-size: 0.72rem; color: var(--text-subtle); font-family: 'JetBrains Mono', monospace;">Protected by Vault</span>
+                `)}
+              </div>
+
+            </div>
+          </div>
+
         </article>
       `;
     }
@@ -1566,15 +1870,25 @@
       const resolved = state.submissions.filter(s => s.status === 'RESOLVED').length;
       const totalHype = state.submissions.reduce((acc, s) => acc + s.hypeCount, 0);
 
-      document.getElementById('stat-total').innerText = total;
-      document.getElementById('stat-pending').innerText = pending;
-      document.getElementById('stat-in-progress').innerText = inProg;
-      document.getElementById('stat-resolved').innerText = resolved;
-      document.getElementById('stat-hype').innerText = totalHype;
+      const elTotal = document.getElementById('stat-total');
+      const elPending = document.getElementById('stat-pending');
+      const elInProg = document.getElementById('stat-in-progress');
+      const elResolved = document.getElementById('stat-resolved');
+      const elHype = document.getElementById('stat-hype');
+
+      if (elTotal) elTotal.innerText = total;
+      if (elPending) elPending.innerText = pending;
+      if (elInProg) elInProg.innerText = inProg;
+      if (elResolved) elResolved.innerText = resolved;
+      if (elHype) elHype.innerText = totalHype;
     }
 
-    // Modal Handling
+    // Modal Handling (Student Only)
     function openReportModal() {
+      if (state.role === 'ADMIN') {
+        showToast('⚠️ Administrators cannot submit student complaints.');
+        return;
+      }
       document.getElementById('report-modal').classList.add('open');
       document.getElementById('report-title').focus();
     }
@@ -1586,6 +1900,10 @@
 
     function handleNewReport(event) {
       event.preventDefault();
+      if (state.role === 'ADMIN') {
+        showToast('⚠️ Administrators cannot submit student complaints.');
+        return;
+      }
       const title = document.getElementById('report-title').value.trim();
       const desc = document.getElementById('report-desc').value.trim();
       const type = document.getElementById('report-type').value;
@@ -1614,6 +1932,7 @@
       };
 
       state.submissions.unshift(newSubmission);
+      state.expandedCardIds.add(newId); // Open newly created report for instant verification
       saveData();
       closeReportModal();
       setActiveTab('feed');
@@ -1667,9 +1986,9 @@
           const qr = qrcode(0, 'M');
           qr.addData(currentUrl);
           qr.make();
-          container.innerHTML = qr.createImgTag(6, 8);
+          container.innerHTML = qr.createImgTag(5, 6);
         } catch (e) {
-          container.innerHTML = `<p style="color:#000;">${currentUrl}</p>`;
+          container.innerHTML = `<p style="color:#0f172a;">${currentUrl}</p>`;
         }
       }
       document.getElementById('qr-modal').classList.add('open');

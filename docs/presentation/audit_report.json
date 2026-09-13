@@ -1,0 +1,282 @@
+[
+  {
+    "slideNum": 1,
+    "title": "⚡ AURA Platform",
+    "speaker": "Muhammed Rinshid VP • Lead",
+    "smallFontsCount": 0,
+    "smallFontExamples": [],
+    "overflowingElements": [],
+    "emptyOrSpaciousCards": [],
+    "issues": []
+  },
+  {
+    "slideNum": 2,
+    "title": "The Campus Redressal Crisis vs. AURA Paradigm",
+    "speaker": "Muhammed Rinshid VP",
+    "smallFontsCount": 0,
+    "smallFontExamples": [],
+    "overflowingElements": [],
+    "emptyOrSpaciousCards": [],
+    "issues": []
+  },
+  {
+    "slideNum": 3,
+    "title": "Phase 2 Implementation Milestone: 85% Completed",
+    "speaker": "Muhammed Rinshid VP",
+    "smallFontsCount": 0,
+    "smallFontExamples": [],
+    "overflowingElements": [],
+    "emptyOrSpaciousCards": [],
+    "issues": []
+  },
+  {
+    "slideNum": 4,
+    "title": "4-Tier Enterprise Architecture & Layer Isolation",
+    "speaker": "Muhammed Rinshid VP",
+    "smallFontsCount": 0,
+    "smallFontExamples": [],
+    "overflowingElements": [],
+    "emptyOrSpaciousCards": [],
+    "issues": []
+  },
+  {
+    "slideNum": 5,
+    "title": "The Decoupled Anonymity Vault Relational Model",
+    "speaker": "Rinshid & Nafih",
+    "smallFontsCount": 0,
+    "smallFontExamples": [],
+    "overflowingElements": [],
+    "emptyOrSpaciousCards": [],
+    "issues": []
+  },
+  {
+    "slideNum": 6,
+    "title": "Enterprise Technology Stack & Technical Justification",
+    "speaker": "Muhammed Rinshid VP",
+    "smallFontsCount": 0,
+    "smallFontExamples": [],
+    "overflowingElements": [],
+    "emptyOrSpaciousCards": [],
+    "issues": []
+  },
+  {
+    "slideNum": 7,
+    "title": "Five-Member Module Ownership & Java Code Matrix",
+    "speaker": "Muhammed Rinshid VP",
+    "smallFontsCount": 0,
+    "smallFontExamples": [],
+    "overflowingElements": [],
+    "emptyOrSpaciousCards": [],
+    "issues": []
+  },
+  {
+    "slideNum": 8,
+    "title": "The 5-Step Golden Path Live Demonstration",
+    "speaker": "Muhammed Rinshid VP",
+    "smallFontsCount": 0,
+    "smallFontExamples": [],
+    "overflowingElements": [],
+    "emptyOrSpaciousCards": [],
+    "issues": []
+  },
+  {
+    "slideNum": 9,
+    "title": "Student Portal: High-DPI Desktop Interface & Feed",
+    "speaker": "Rinshid & Rahandeep",
+    "smallFontsCount": 0,
+    "smallFontExamples": [],
+    "overflowingElements": [],
+    "emptyOrSpaciousCards": [],
+    "issues": []
+  },
+  {
+    "slideNum": 10,
+    "title": "Admin Dashboard: Governance, Triage & Audit",
+    "speaker": "Rinshid & Athil",
+    "smallFontsCount": 0,
+    "smallFontExamples": [],
+    "overflowingElements": [],
+    "emptyOrSpaciousCards": [],
+    "issues": []
+  },
+  {
+    "slideNum": 11,
+    "title": "System Startup Lifecycle & Connection Factory",
+    "speaker": "Muhammed Rinshid VP (Lead)",
+    "smallFontsCount": 0,
+    "smallFontExamples": [],
+    "overflowingElements": [],
+    "emptyOrSpaciousCards": [],
+    "issues": []
+  },
+  {
+    "slideNum": 12,
+    "title": "Multi-Host Cloud Resilience & DNS Failover",
+    "speaker": "Muhammed Rinshid VP",
+    "smallFontsCount": 0,
+    "smallFontExamples": [],
+    "overflowingElements": [],
+    "emptyOrSpaciousCards": [],
+    "issues": []
+  },
+  {
+    "slideNum": 13,
+    "title": "Rinshid's Module Engineering & File Deliverables",
+    "speaker": "Muhammed Rinshid VP",
+    "smallFontsCount": 0,
+    "smallFontExamples": [],
+    "overflowingElements": [],
+    "emptyOrSpaciousCards": [],
+    "issues": []
+  },
+  {
+    "slideNum": 14,
+    "title": "RFC 8252 Google OAuth 2.0 PKCE Loopback Engine",
+    "speaker": "Mohammed Nafih",
+    "smallFontsCount": 0,
+    "smallFontExamples": [],
+    "overflowingElements": [],
+    "emptyOrSpaciousCards": [],
+    "issues": []
+  },
+  {
+    "slideNum": 15,
+    "title": "BCrypt Password Hashing & Institutional Domain Gating",
+    "speaker": "Mohammed Nafih",
+    "smallFontsCount": 0,
+    "smallFontExamples": [],
+    "overflowingElements": [],
+    "emptyOrSpaciousCards": [],
+    "issues": []
+  },
+  {
+    "slideNum": 16,
+    "title": "Nafih's Security Engineering & File Deliverables",
+    "speaker": "Mohammed Nafih",
+    "smallFontsCount": 0,
+    "smallFontExamples": [],
+    "overflowingElements": [],
+    "emptyOrSpaciousCards": [],
+    "issues": []
+  },
+  {
+    "slideNum": 17,
+    "title": "Crowd Urgency & The Hype Prioritization Engine",
+    "speaker": "Nirmal Binoy",
+    "smallFontsCount": 0,
+    "smallFontExamples": [],
+    "overflowingElements": [],
+    "emptyOrSpaciousCards": [],
+    "issues": []
+  },
+  {
+    "slideNum": 18,
+    "title": "Double-Vote Prevention & Database Idempotency",
+    "speaker": "Nirmal Binoy",
+    "smallFontsCount": 0,
+    "smallFontExamples": [],
+    "overflowingElements": [],
+    "emptyOrSpaciousCards": [],
+    "issues": []
+  },
+  {
+    "slideNum": 19,
+    "title": "Nirmal's Hype Engine & File Deliverables",
+    "speaker": "Nirmal Binoy",
+    "smallFontsCount": 0,
+    "smallFontExamples": [],
+    "overflowingElements": [],
+    "emptyOrSpaciousCards": [],
+    "issues": []
+  },
+  {
+    "slideNum": 20,
+    "title": "DAO Layer Architecture & JDBC PreparedStatements",
+    "speaker": "Rahandeep RD",
+    "smallFontsCount": 0,
+    "smallFontExamples": [],
+    "overflowingElements": [],
+    "emptyOrSpaciousCards": [],
+    "issues": []
+  },
+  {
+    "slideNum": 21,
+    "title": "ACID Transactions: Atomic Ticket & Receipt Insertion",
+    "speaker": "Rahandeep RD",
+    "smallFontsCount": 0,
+    "smallFontExamples": [],
+    "overflowingElements": [],
+    "emptyOrSpaciousCards": [],
+    "issues": []
+  },
+  {
+    "slideNum": 22,
+    "title": "Rahandeep's Persistence Layer & File Deliverables",
+    "speaker": "Rahandeep RD",
+    "smallFontsCount": 0,
+    "smallFontExamples": [],
+    "overflowingElements": [],
+    "emptyOrSpaciousCards": [],
+    "issues": []
+  },
+  {
+    "slideNum": 23,
+    "title": "5-State Resolution Pipeline & Immutable Audit Trail",
+    "speaker": "Athil Rahuman A",
+    "smallFontsCount": 0,
+    "smallFontExamples": [],
+    "overflowingElements": [],
+    "emptyOrSpaciousCards": [],
+    "issues": []
+  },
+  {
+    "slideNum": 24,
+    "title": "RFC-4180 CSV Reporting & Automated JUnit 5 Suite",
+    "speaker": "Athil Rahuman A",
+    "smallFontsCount": 0,
+    "smallFontExamples": [],
+    "overflowingElements": [],
+    "emptyOrSpaciousCards": [],
+    "issues": []
+  },
+  {
+    "slideNum": 25,
+    "title": "Reflection-Based Anonymity Regression Testing",
+    "speaker": "Athil Rahuman A",
+    "smallFontsCount": 0,
+    "smallFontExamples": [],
+    "overflowingElements": [],
+    "emptyOrSpaciousCards": [],
+    "issues": []
+  },
+  {
+    "slideNum": 26,
+    "title": "Planned vs. Completed Work Matrix (85% Implemented)",
+    "speaker": "Muhammed Rinshid VP",
+    "smallFontsCount": 0,
+    "smallFontExamples": [],
+    "overflowingElements": [],
+    "emptyOrSpaciousCards": [],
+    "issues": []
+  },
+  {
+    "slideNum": 27,
+    "title": "Empirical Quality Benchmarks & Verification Proof",
+    "speaker": "Muhammed Rinshid VP",
+    "smallFontsCount": 0,
+    "smallFontExamples": [],
+    "overflowingElements": [],
+    "emptyOrSpaciousCards": [],
+    "issues": []
+  },
+  {
+    "slideNum": 28,
+    "title": "Phase 3 Strategic Roadmap & Project Conclusion",
+    "speaker": "All Team Members",
+    "smallFontsCount": 0,
+    "smallFontExamples": [],
+    "overflowingElements": [],
+    "emptyOrSpaciousCards": [],
+    "issues": []
+  }
+]

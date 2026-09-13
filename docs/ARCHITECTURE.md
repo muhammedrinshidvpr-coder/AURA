@@ -414,8 +414,8 @@ To satisfy the rubric requirement for **"Substantial individual contribution sup
 
 | Team Member | Roll No | Slide Ownership | Technical Modules & Package Ownership |
 |---|---|---|---|
-| **Muhammed Rinshid VP** *(Team Lead)* | B25CS045 | Slides 1–4, 20 | **System Coordination, Core Architecture & Integration:** `aura.Main`, `aura.config.DatabaseConfig`, `aura.ui.LoginFrame`, Supabase cloud configuration. |
-| **Nirmal Binoy** | B25CS052 | Slides 5–8 | **Proposed Solution, Models & Trending Engine:** `aura.model.*`, `aura.enums.*`, `aura.service.HypeService`, `aura.dao.SubmissionHypeDAO`. |
-| **Mohammed Nafih** | B25CS037 | Slides 9–12 | **RBAC, Anonymity Vault & Security Pipeline:** `aura.service.AuthService`, `aura.dao.StudentReceiptDAO`, `aura.util.PasswordUtil`, `aura.util.ValidationUtil`. |
-| **Rahandeep RD** | B25CS053 | Slides 13–14, 18 | **Database Engineering & FlatLaf Desktop GUI:** `sql/schema.sql`, `sql/seed.sql`, `aura.ui.student.*`, `aura.dao.SubmissionDAO`, `aura.dao.UserDAO`. |
-| **Athil Rahuman A** | B25CS084 | Slides 15–17, 19 | **Audit Lifecycle, Admin Dashboard & Analytics:** `aura.service.TrackingService`, `aura.service.ReportService`, `aura.ui.admin.*`, `aura.dao.ResolutionNoteDAO`. |
+| **Muhammed Rinshid VP** *(Team Lead)* | B25CSB45 | Slides 1–4, 20 | **System Coordination, Core Architecture & Integration:** `aura.Main`, `aura.config.DatabaseConfig`, `aura.ui.LoginFrame`, Supabase cloud configuration. |
+| **Nirmal Binoy** | B25CSB52 | Slides 5–8 | **Proposed Solution, Models & Trending Engine:** `aura.model.*`, `aura.enums.*`, `aura.service.HypeService`, `aura.dao.SubmissionHypeDAO`. |
+| **Mohammed Nafih** | B25CSB37 | Slides 9–12 | **RBAC, Anonymity Vault & Security Pipeline:** `aura.service.AuthService`, `aura.dao.StudentReceiptDAO`, `aura.util.PasswordUtil`, `aura.util.ValidationUtil`. |
+| **Rahandeep RD** | B25CSB53 | Slides 13–14, 18 | **Database Engineering & FlatLaf Desktop GUI:** `sql/schema.sql`, `sql/seed.sql`, `aura.ui.student.*`, `aura.dao.SubmissionDAO`, `aura.dao.UserDAO`. |
+| **Athil Rahuman A** | B25CSB84 | Slides 15–17, 19 | **Audit Lifecycle, Admin Dashboard & Analytics:** `aura.service.TrackingService`, `aura.service.ReportService`, `aura.ui.admin.*`, `aura.dao.ResolutionNoteDAO`. |
