@@ -19,7 +19,8 @@ public class RenderScreenshots {
         // Initialize theme
         UITheme.initLookAndFeel();
 
-        String outDir = "C:\\Users\\lenovo\\.gemini\\antigravity-ide\\brain\\9ef1946b-9c7c-4216-a3a4-3936195c9b55";
+        String outDir = "docs/presentation/screenshots";
+        new File(outDir).mkdirs();
 
         try {
             // 1. Render Login Frame
